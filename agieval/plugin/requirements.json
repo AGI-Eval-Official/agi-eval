@@ -1,0 +1,5 @@
+{
+    "agieval.plugin.metrics.drop_f1_metrics": [
+        "scipy"
+    ]
+}

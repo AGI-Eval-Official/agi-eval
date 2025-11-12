@@ -1,0 +1,116 @@
+[
+    {
+        "benchmark": "test_example_1",
+        "location_test": "example/dataset/test/test_1.json",
+        "flow_stages": [
+            {
+                "stage": "SimpleDataProcessor",
+                "plugin_type": "stage_data_processor",
+                "plugin_implement": "SimpleDataProcessor",
+                "context_params": {
+                    "benchmark_id": "test_example_1",
+                    "work_dir": "result/test",
+                    "use_cache": "False",
+                    "benchmark_path": "example/dataset/test/test_1.json"
+                },
+                "plugins": [
+                    {
+                        "plugin_implement": "MultipleChoiceScenario",
+                        "plugin_type": "scenario",
+                        "context_params": {
+                            "benchmark_id": "test_example_1",
+                            "work_dir": "result/test",
+                            "benchmark_path": "example/dataset/test/test_1.json"
+                        }
+                    },
+                    {
+                        "plugin_implement": "GenerationAdapter",
+                        "plugin_type": "adapter",
+                        "context_params": {
+                            "benchmark_id": "test_example_1",
+                            "work_dir": "result/test",
+                            "max_new_tokens": 4096,
+                            "temperature": 0.7,
+                            "top_p": 0.95,
+                            "top_k": 0,
+                            "presence_penalty": 0,
+                            "frequency_penalty": 0.0,
+                            "stop_sequences": [],
+                            "adapter_stop_sequence": [],
+                            "benchmark_path": "example/dataset/test/test_1.json"
+                        }
+                    },
+                    {
+                        "plugin_implement": "GenerationWindowService",
+                        "plugin_type": "window_service",
+                        "context_params": {
+                            "benchmark_id": "test_example_1",
+                            "work_dir": "result/test",
+                            "benchmark_path": "example/dataset/test/test_1.json"
+                        }
+                    }
+                ],
+                "use_cache": false
+            }
+        ],
+        "flow_config_file": "",
+        "use_cache": false
+    },
+    {
+        "benchmark": "test_example_2",
+        "location_test": "example/dataset/test/test_2.json",
+        "flow_stages": [
+            {
+                "stage": "SimpleDataProcessor",
+                "plugin_type": "stage_data_processor",
+                "plugin_implement": "SimpleDataProcessor",
+                "context_params": {
+                    "benchmark_id": "test_example_2",
+                    "work_dir": "result/test",
+                    "use_cache": "False",
+                    "benchmark_path": "example/dataset/test/test_2.json"
+                },
+                "plugins": [
+                    {
+                        "plugin_implement": "MultipleChoiceScenario",
+                        "plugin_type": "scenario",
+                        "context_params": {
+                            "benchmark_id": "test_example_2",
+                            "work_dir": "result/test",
+                            "benchmark_path": "example/dataset/test/test_2.json"
+                        }
+                    },
+                    {
+                        "plugin_implement": "GenerationAdapter",
+                        "plugin_type": "adapter",
+                        "context_params": {
+                            "benchmark_id": "test_example_2",
+                            "work_dir": "result/test",
+                            "max_new_tokens": 4096,
+                            "temperature": 0.7,
+                            "top_p": 0.95,
+                            "top_k": 0,
+                            "presence_penalty": 0,
+                            "frequency_penalty": 0.0,
+                            "stop_sequences": [],
+                            "adapter_stop_sequence": [],
+                            "benchmark_path": "example/dataset/test/test_2.json"
+                        }
+                    },
+                    {
+                        "plugin_implement": "GenerationWindowService",
+                        "plugin_type": "window_service",
+                        "context_params": {
+                            "benchmark_id": "test_example_2",
+                            "work_dir": "result/test",
+                            "benchmark_path": "example/dataset/test/test_2.json"
+                        }
+                    }
+                ],
+                "use_cache": false
+            }
+        ],
+        "flow_config_file": "",
+        "use_cache": false
+    }
+]

@@ -1,0 +1,3410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM评测报告</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5a67d8;
+            --primary-light: #e6f3ff;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
+            --info-color: #4299e1;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: var(--text-primary);
+        }
+
+        .container-fluid {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding-top: 20px;
+            margin: 0 auto;
+            max-width: 2100px;
+        }
+
+        .header-container {
+            position: relative;
+            /* margin-bottom: 10px; */
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header-container h1 {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .language-switcher {
+            position: relative;
+            margin-left: 20px;
+        }
+
+        .lang-toggle {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-sm);
+            padding: 2px;
+            gap: 1px;
+            overflow: hidden;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            flex: 1;
+            min-width: 60px;
+        }
+
+        .lang-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: 1px solid var(--primary-color);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .lang-btn.active::before {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 1px;
+        }
+
+        .lang-icon {
+            font-size: 0.75rem;
+            font-weight: 600;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border-radius: 50%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .lang-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .lang-divider {
+            width: 1px;
+            height: 16px;
+            background: var(--border-color);
+            margin: 0 6px;
+            border-radius: 1px;
+        }
+
+        .path-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            background: var(--light-bg);
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            display: inline-block;
+            border: 1px solid var(--border-color);
+        }
+
+        .card {
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
+            border: none;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-light), #f7fafc);
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .nav-tabs {
+            margin-bottom: 0;
+            border-bottom: 2px solid var(--border-color);
+            background: var(--light-bg);
+            /* padding: 0 10px; */
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 10px 16px;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            background: transparent;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-color);
+            border-color: transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: var(--card-bg);
+            color: var(--primary-color);
+            font-weight: 600;
+            border-color: var(--border-color) var(--border-color) var(--card-bg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-tabs .nav-link.active::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .tab-content {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            background: var(--card-bg);
+            min-height: 400px;
+        }
+        .table-responsive {
+            max-height: calc(100vh - 220px);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* 评测指标表格固定高度和表头冻结 */
+        .metrics-table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-md);
+            background: var(--card-bg);
+        }
+
+        .metrics-table-container table {
+            margin-bottom: 0;
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .metrics-table-container thead th {
+            position: sticky;
+            background: linear-gradient(135deg, var(--primary-light), #f7fafc);
+            z-index: 10;
+            border: 1px solid var(--border-color);
+            padding: 15px 12px;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .metrics-table-container thead tr {
+            border: 0px;
+        }
+
+        /* 第一层表头样式 */
+        .metrics-table-container thead tr:first-child th {
+            top: 0;
+            z-index: 12;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* 第二层表头样式 */
+        .metrics-table-container thead tr:nth-child(2) th {
+            top: 51px; /* 第一层表头的高度 */
+            z-index: 11;
+            background: linear-gradient(135deg, var(--primary-light), #f7fafc);
+        }
+
+        /* 表格数据单元格样式 */
+        .metrics-table-container tbody td {
+            border: 1px solid var(--border-color);
+            padding: 12px 8px;
+            text-align: center;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+            background: var(--card-bg);
+        }
+
+        .metrics-table-container tbody tr:hover td {
+            background: var(--light-bg);
+            transform: scale(1.01);
+        }
+
+        .metrics-table-container tbody tr:nth-child(even) td {
+            background: #fafbfc;
+        }
+
+        .metrics-table-container tbody tr:nth-child(even):hover td {
+            background: var(--light-bg);
+        }
+
+        /* 数据集列宽度 - 40% */
+        .metrics-table-container td:first-child {
+            width: 40%;
+            font-weight: 500;
+            text-align: left;
+            padding-left: 15px;
+        }
+
+        /* 样本数列宽度 - 10% */
+        .metrics-table-container td:last-child {
+            width: 10%;
+            font-weight: 600;
+            color: var(--info-color);
+        }
+
+        /* 评测指标页面样式优化 - 允许页面滚动 */
+        #overview.show.active {
+            /* 不设置固定高度，允许内容自然增长并产生页面滚动 */
+            min-height: var(--available-height, calc(100vh - 200px));
+        }
+
+        /* 评测详情页面样式优化 - 只在该tab激活时生效 */
+        #details.show.active {
+            height: var(--available-height, calc(100vh - 200px));
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #details.show.active .row.mb-3 {
+            flex-shrink: 0;
+            margin-bottom: 15px;
+        }
+
+        #details.show.active .table-responsive {
+            flex: 1;
+            overflow-y: auto;
+            max-height: none;
+            min-height: 0;
+            margin-bottom: 0;
+        }
+
+        #details.show.active nav[aria-label="Page navigation"] {
+            flex-shrink: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        /* 确保在小屏幕上也能正常显示 */
+        @media (max-height: 600px) {
+
+            #details.show.active,
+            #config.show.active,
+            #flow.show.active {
+                height: calc(100vh - 160px);
+            }
+
+            #overview.show.active {
+                min-height: calc(100vh - 160px);
+            }
+        }
+
+        /* 中等屏幕优化 */
+        @media (max-height: 800px) {
+
+            #details.show.active,
+            #config.show.active,
+            #flow.show.active {
+                height: calc(100vh - 180px);
+            }
+
+            #overview.show.active {
+                min-height: calc(100vh - 180px);
+            }
+        }
+
+        /* 优化表格在小屏幕上的显示 */
+        @media (max-width: 768px) {
+
+            #details-table th:nth-child(3),
+            #details-table th:nth-child(4),
+            #details-table td:nth-child(3),
+            #details-table td:nth-child(4) {
+                min-width: 200px;
+            }
+        }
+
+        .cell-content {
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .output-content {
+            height: 100%;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        #details-table th:nth-child(1),
+        #details-table td:nth-child(1) {
+            width: 4%;
+        }
+
+        #details-table th:nth-child(2),
+        #details-table td:nth-child(2),
+        #details-table th:nth-child(3),
+        #details-table td:nth-child(3) {
+            width: 10%;
+        }
+
+        #details-table th:nth-child(4),
+        #details-table th:nth-child(5),
+        #details-table td:nth-child(4),
+        #details-table td:nth-child(5) {
+            width: 35%;
+            min-width: 250px;
+        }
+
+        #details-table th:nth-child(6),
+        #details-table td:nth-child(6) {
+            width: 6%;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        /* 输入框和表单控件美化 */
+        .form-control,
+        .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* 按钮美化 */
+        .btn {
+            border-radius: var(--border-radius-sm);
+            padding: 12px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-color));
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-primary.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-outline-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--text-secondary);
+            color: white;
+            border-color: var(--text-secondary);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+        }
+
+        /* 输入组美化 */
+        .input-group {
+            box-shadow: var(--shadow-sm);
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+        }
+
+        .input-group .form-control {
+            border-right: none;
+            border-radius: var(--border-radius-sm) 0 0 var(--border-radius-sm);
+        }
+
+        .input-group .btn {
+            border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+            border-left: none;
+        }
+
+        /* 分页组件样式 */
+        .pagination-select {
+            min-width: 120px;
+            border-radius: var(--border-radius-sm);
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .pagination-input {
+            width: 70px;
+            border-radius: var(--border-radius-sm);
+            border: 2px solid var(--border-color);
+            text-align: center;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 8px 12px;
+        }
+
+        .pagination-btn {
+            min-width: 45px;
+            height: 40px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 0 2px;
+        }
+
+        .pagination-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .pagination-btn.disabled {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .pagination-btn.disabled:hover {
+            background: var(--light-bg);
+            color: var(--text-secondary);
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 图表类型切换按钮组 */
+        .chart-type-toggle {
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-type-toggle .btn {
+            border-radius: 0;
+            margin: 0;
+        }
+
+        .chart-type-toggle .btn:first-child {
+            border-radius: var(--border-radius-sm) 0 0 var(--border-radius-sm);
+        }
+
+        .chart-type-toggle .btn:last-child {
+            border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 450px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-sm);
+            padding: 20px;
+        }
+
+        .json-viewer {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 15px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 350px;
+            overflow-y: auto;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .flow-diagram {
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            overflow: auto;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* 详情表格美化 */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-size: 0.875rem;
+            padding: 15px 12px;
+            border: none;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .table tbody td {
+            /* padding: 15px 12px; */
+            border-top: 1px solid var(--border-color);
+            vertical-align: middle;
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover td {
+            background: var(--light-bg);
+        }
+
+        .table tbody tr:nth-child(even) td {
+            background: #fafbfc;
+        }
+
+        .table tbody tr:nth-child(even):hover td {
+            background: var(--light-bg);
+        }
+
+        .cell-content {
+            max-height: 180px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            padding: 2px;
+            background: var(--light-bg);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .output-content {
+            height: 100%;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .stage-node rect {
+            fill: #e9f5f8;
+            stroke: #4dabcf;
+            stroke-width: 2px;
+            filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2));
+        }
+
+        .plugin-node rect {
+            fill: #f8f9fa;
+            stroke: #adb5bd;
+            stroke-width: 1px;
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.1));
+        }
+
+        .edgePath path {
+            stroke: #6c757d;
+            stroke-width: 1.5px;
+        }
+
+        .edgePath marker {
+            fill: #6c757d;
+        }
+
+        .node text {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            fill: #333;
+        }
+
+        .stage-node text {
+            font-weight: 600;
+            fill: #0d6efd;
+        }
+
+        .plugin-node text {
+            font-size: 12px;
+        }
+
+        .path-info {
+            font-size: 0.8rem;
+            color: #6c757d;
+            position: absolute;
+            right: 0;
+            bottom: -15px;
+        }
+
+        .header-container {
+            position: relative;
+            /* margin-bottom: 30px; */
+        }
+
+        /* 流程图分组tab样式 */
+        .flow-group-tabs {
+            margin-bottom: 0;
+            border-bottom: 2px solid var(--border-color);
+            background: var(--light-bg);
+            /* padding: 0 15px; */
+            border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+        }
+
+        .flow-group-tabs .nav-link {
+            border: none;
+            border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 12px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 0 3px;
+            position: relative;
+            background: transparent;
+        }
+
+        .flow-group-tabs .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-color);
+            border-color: transparent;
+            transform: translateY(-1px);
+        }
+
+        .flow-group-tabs .nav-link.active {
+            color: var(--primary-color);
+            background: var(--card-bg);
+            border-color: var(--border-color) var(--border-color) var(--card-bg);
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .flow-group-tabs .nav-link.active::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        /* 流程图分组内容区域 */
+        .flow-group-content {
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
+            background: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .flow-group-content .tab-pane {
+            padding: 0;
+        }
+
+        /* 数据集选择器优化 */
+        .dataset-selector-container {
+            position: relative;
+        }
+
+        .dataset-select-optimized {
+            min-width: 300px;
+            max-width: 500px;
+            font-size: 0.9rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .dataset-select-optimized option {
+            padding: 12px 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        /* 当前选中数据集的完整显示 */
+        .current-dataset-display {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            word-break: break-all;
+            line-height: 1.4;
+            padding: 8px 12px;
+            background: var(--light-bg);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        /* 可搜索的数据集选择器 */
+        .searchable-select {
+            position: relative;
+        }
+
+        .searchable-select input {
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .searchable-select input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .searchable-select .dropdown-menu {
+            width: 100%;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-lg);
+            background: var(--card-bg);
+            padding: 8px 0;
+            margin-top: 4px;
+        }
+
+        .searchable-select .dropdown-item {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+        }
+
+        .searchable-select .dropdown-item:hover {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            transform: translateX(4px);
+        }
+
+        .searchable-select .dropdown-item:active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* 评测参数页面样式优化 - 固定高度，内部滚动 */
+        #config.show.active {
+            height: var(--available-height, calc(100vh - 200px));
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #config.show.active .card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0;
+        }
+
+        #config.show.active .card-body {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #config.show.active .table-responsive {
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        /* 评测流程tab样式优化 - 只在该tab激活时生效 */
+        #flow.show.active {
+            height: var(--available-height, calc(100vh - 200px));
+            display: flex;
+            flex-direction: column;
+        }
+
+        #flow.show.active .flow-group-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 80px);
+            /* 减去流程图分组tabs的高度 */
+        }
+
+        #flow.show.active .tab-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #flow.show.active .d-flex.flex-column {
+            height: 100%;
+        }
+
+        #flow.show.active .d-flex.flex-column>.d-flex.justify-content-start {
+            flex-shrink: 0;
+        }
+
+        #flow.show.active .flow-diagram {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            overflow: auto;
+            max-height: none;
+        }
+
+        .flow-group-pane {
+            display: none;
+        }
+
+        .flow-group-pane.active {
+            display: block;
+        }
+
+        /* 数据集统计信息 */
+        .dataset-stats {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+
+        /* 数据集badge样式 */
+        .dataset-badge {
+            transition: all 0.2s ease-in-out;
+            max-width: 100%;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .dataset-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .dataset-badge.bg-primary {
+            background-color: #0d6efd !important;
+        }
+
+        .dataset-badge.bg-secondary {
+            background-color: #6c757d !important;
+        }
+
+        .dataset-badge.bg-secondary:hover {
+            background-color: #5a6268 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="header-container" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="header-title">
+                <h1 data-i18n="page.title">LLM评测报告</h1>
+            </div>
+                <div class="language-switcher">
+                <div class="lang-toggle">
+                    <button class="lang-btn active" data-lang="en" onclick="switchLanguage('en')">
+                        <span class="lang-icon">EN</span>
+                        <span class="lang-text" data-i18n="lang.en">English</span>
+                    </button>
+                    <div class="lang-divider"></div>
+                    <button class="lang-btn" data-lang="zh" onclick="switchLanguage('zh')">
+                        <span class="lang-icon">中</span>
+                        <span class="lang-text" data-i18n="lang.zh">中文</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="mainTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview"
+                    type="button" role="tab" aria-controls="overview" aria-selected="true" data-i18n="tabs.evaluation-metrics">评测指标</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button"
+                    role="tab" aria-controls="details" aria-selected="false" data-i18n="tabs.evaluation-details">评测详情</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button"
+                    role="tab" aria-controls="config" aria-selected="false" data-i18n="tabs.evaluation-params">评测参数</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="flow-tab" data-bs-toggle="tab" data-bs-target="#flow" type="button"
+                    role="tab" aria-controls="flow" aria-selected="false" data-i18n="tabs.evaluation-flow">评测流程</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabContent">
+            <!-- 评测指标 -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                <!-- 数据集搜索 -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="dataset-filter-input" data-i18n-placeholder="placeholders.search-dataset" placeholder="搜索数据集...">
+                            <button class="btn btn-outline-secondary" type="button" id="dataset-filter-button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="metrics-table-container">
+                            <table class="table table-bordered table-hover" id="metrics-table">
+                                <thead id="metrics-table-header">
+                                    <!-- 表头将通过JavaScript动态加载 -->
+                                </thead>
+                                <tbody id="metrics-table-body">
+                                    <!-- 数据将通过JavaScript动态加载 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 data-i18n="charts.metrics-visualization">指标可视化</h5>
+                                <div class="btn-group chart-type-toggle">
+                                    <button type="button" class="btn btn-sm btn-outline-primary active"
+                                        id="bar-chart-btn" data-i18n="charts.bar-chart">柱状图</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                        id="line-chart-btn" data-i18n="charts.line-chart">折线图</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="metrics-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 评测详情 -->
+            <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="searchable-select">
+                            <input type="text" class="form-control" id="dataset-search-input" data-i18n-placeholder="placeholders.select-dataset" placeholder="选择数据集..."
+                                readonly data-bs-toggle="dropdown" aria-expanded="false">
+                            <ul class="dropdown-menu" id="dataset-dropdown">
+                                <!-- 数据集选项将通过JavaScript动态加载 -->
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-select" id="metric-select">
+                                    <option value="" data-i18n="options.select-metric">选择指标...</option>
+                                    <!-- 指标选项将通过JavaScript动态加载 -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="search-input" data-i18n-placeholder="placeholders.search" placeholder="搜索...">
+                                    <button class="btn btn-outline-secondary" type="button" id="search-button">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="details-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="table.headers.id">ID</th>
+                                <th data-i18n="table.headers.question">问题</th>
+                                <th data-i18n="table.headers.correct-answer">正确答案</th>
+                                <th data-i18n="table.headers.model-input">模型输入</th>
+                                <th data-i18n="table.headers.model-output">模型输出</th>
+                                <th data-i18n="table.headers.score">得分</th>
+                            </tr>
+                        </thead>
+                        <tbody id="details-table-body">
+                            <!-- 数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav aria-label="Page navigation">
+                    <div class="d-flex justify-content-center align-items-center flex-wrap gap-3 py-2">
+                        <!-- 分页按钮组 -->
+                        <div class="d-flex align-items-center gap-1" id="pagination-controls">
+                            <!-- 分页控件将通过JavaScript动态加载 -->
+                        </div>
+
+                        <!-- 每页数量选择 -->
+                        <div class="d-flex align-items-center gap-2">
+                            <select class="form-select form-select-sm pagination-select" id="items-per-page">
+                                <option value="10" data-i18n="pagination.items-per-page-10">10条/页</option>
+                                <option value="20" data-i18n="pagination.items-per-page-20">20条/页</option>
+                                <option value="50" data-i18n="pagination.items-per-page-50">50条/页</option>
+                                <option value="100" data-i18n="pagination.items-per-page-100">100条/页</option>
+                            </select>
+                        </div>
+
+                        <!-- 跳转到指定页 -->
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted" data-i18n="pagination.goto">前往</span>
+                            <input type="number" class="form-control form-control-sm pagination-input" id="goto-page"
+                                min="1" placeholder="1">
+                            <button class="btn btn-sm btn-outline-secondary" id="goto-button" data-i18n="pagination.goto-button">跳转</button>
+                        </div>
+
+                        <!-- 总数显示 -->
+                        <div class="text-muted">
+                            <span id="pagination-summary" data-i18n="pagination.total">共 0 条</span>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- 评测参数 -->
+            <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="config-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 data-i18n="config.title">评测配置参数</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="config-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="config.param-name">参数名</th>
+                                        <th data-i18n="config.param-value">参数值</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="config-table-body">
+                                    <!-- 数据将通过JavaScript动态加载 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 评测流程 -->
+            <div class="tab-pane fade" id="flow" role="tabpanel" aria-labelledby="flow-tab">
+                <!-- 流程图分组tabs -->
+                <ul class="nav nav-tabs flow-group-tabs" id="flowGroupTabs" role="tablist">
+                    <!-- 流程图分组tab将通过JavaScript动态加载 -->
+                </ul>
+
+                <!-- 流程图分组内容 -->
+                <div class="tab-content flow-group-content" id="flowGroupTabContent">
+                    <!-- 流程图分组内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dagre-d3@0.6.4/dist/dagre-d3.min.js"></script>
+    <script>
+        // 国际化配置
+        const i18nConfig = {
+            zh: {
+                'page.title': 'LLM评测报告',
+                'tabs.evaluation-metrics': '评测指标',
+                'tabs.evaluation-details': '评测详情',
+                'tabs.evaluation-params': '评测参数',
+                'tabs.evaluation-flow': '评测流程',
+                'placeholders.search-dataset': '搜索数据集...',
+                'placeholders.select-dataset': '选择数据集...',
+                'placeholders.search': '搜索...',
+                'options.select-metric': '选择指标...',
+                'charts.metrics-visualization': '指标可视化',
+                'charts.bar-chart': '柱状图',
+                'charts.line-chart': '折线图',
+                'table.headers.id': 'ID',
+                'table.headers.question': '问题',
+                'table.headers.correct-answer': '正确答案',
+                'table.headers.model-input': '模型输入',
+                'table.headers.model-output': '模型输出',
+                'table.headers.score': '得分',
+                'pagination.items-per-page-10': '10条/页',
+                'pagination.items-per-page-20': '20条/页',
+                'pagination.items-per-page-50': '50条/页',
+                'pagination.items-per-page-100': '100条/页',
+                'pagination.goto': '前往',
+                'pagination.goto-button': '跳转',
+                'pagination.total': '共 0 条',
+                'pagination.no-data': '暂无数据',
+                'config.title': '评测配置参数',
+                'config.param-name': '参数名',
+                'config.param-value': '参数值',
+                'flow.flow-chart': '流程图',
+                'flow.dataset-count': '个数据集',
+                'flow.select-dataset': '选择数据集...',
+                'flow.stage-params': '阶段参数',
+                'flow.plugin-params': '插件参数',
+                'flow.no-params': '无参数配置',
+                'flow.param-name': '参数名',
+                'flow.param-value': '参数值',
+                'metrics.dataset': '数据集',
+                'metrics.metrics': '评测指标',
+                'metrics.sample-count': '样本数',
+                'metrics.total': '总分',
+                'charts.y-axis-title': '指标值',
+                'charts.x-axis-title': '数据集',
+                'lang.zh': '中文',
+                'lang.en': 'English'
+            },
+            en: {
+                'page.title': 'LLM Evaluation Report',
+                'tabs.evaluation-metrics': 'Evaluation Metrics',
+                'tabs.evaluation-details': 'Evaluation Details',
+                'tabs.evaluation-params': 'Evaluation Parameters',
+                'tabs.evaluation-flow': 'Evaluation Flow',
+                'placeholders.search-dataset': 'Search dataset...',
+                'placeholders.select-dataset': 'Select dataset...',
+                'placeholders.search': 'Search...',
+                'options.select-metric': 'Select metric...',
+                'charts.metrics-visualization': 'Metrics Visualization',
+                'charts.bar-chart': 'Bar Chart',
+                'charts.line-chart': 'Line Chart',
+                'table.headers.id': 'ID',
+                'table.headers.question': 'Question',
+                'table.headers.correct-answer': 'Correct Answer',
+                'table.headers.model-input': 'Model Input',
+                'table.headers.model-output': 'Model Output',
+                'table.headers.score': 'Score',
+                'pagination.items-per-page-10': '10/page',
+                'pagination.items-per-page-20': '20/page',
+                'pagination.items-per-page-50': '50/page',
+                'pagination.items-per-page-100': '100/page',
+                'pagination.goto': 'Go to',
+                'pagination.goto-button': 'Go',
+                'pagination.total': 'Total 0 items',
+                'pagination.no-data': 'No data',
+                'config.title': 'Evaluation Configuration',
+                'config.param-name': 'Parameter',
+                'config.param-value': 'Value',
+                'flow.flow-chart': 'Flow Chart',
+                'flow.dataset-count': 'datasets',
+                'flow.select-dataset': 'Select dataset...',
+                'flow.stage-params': 'Stage Parameters',
+                'flow.plugin-params': 'Plugin Parameters',
+                'flow.no-params': 'No parameters',
+                'flow.param-name': 'Parameter',
+                'flow.param-value': 'Value',
+                'metrics.dataset': 'Dataset',
+                'metrics.metrics': 'Metrics',
+                'metrics.sample-count': 'Sample Count',
+                'metrics.total': 'Total',
+                'charts.y-axis-title': 'Metric Value',
+                'charts.x-axis-title': 'Dataset',
+                'lang.zh': '中文',
+                'lang.en': 'English'
+            }
+        };
+
+        // 当前语言
+        let currentLanguage = 'en';
+
+        // 切换语言函数
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+
+            // 更新HTML lang属性
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+            // 更新语言按钮状态
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                console.log("btn.classList " + btn.classList)
+                btn.classList.remove('active');
+            });
+
+            const switcher = document.querySelector('.language-switcher');
+            switcher.innerHTML = `
+                <div class="lang-toggle">
+                    <button class="lang-btn ${lang === 'en' ? 'active' : ''}" data-lang="en" onclick="switchLanguage('en')">
+                        <span class="lang-icon">EN</span>
+                        <span class="lang-text" data-i18n="lang.en">English</span>
+                    </button>
+                    <div class="lang-divider"></div>
+                    <button class="lang-btn ${lang === 'zh' ? 'active' : ''}" data-lang="zh" onclick="switchLanguage('zh')">
+                        <span class="lang-icon">中</span>
+                        <span class="lang-text" data-i18n="lang.zh">中文</span>
+                    </button>
+                </div>
+            `;
+
+            // 更新所有带有data-i18n属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                console.log(key)
+                if (i18nConfig[lang] && i18nConfig[lang][key]) {
+                    element.textContent = i18nConfig[lang][key];
+                }
+                if (key === 'flow.flow-chart&flow.dataset-count') {
+                    old_lang = lang === 'zh' ? 'en' : 'zh';
+                    let text = element.textContent;
+                    text = text.replace(i18nConfig[old_lang]['flow.flow-chart'], i18nConfig[lang]['flow.flow-chart']);
+                    text = text.replace(i18nConfig[old_lang]['flow.dataset-count'], i18nConfig[lang]['flow.dataset-count']);
+                    element.textContent = text;
+                }
+                
+                if (key.startsWith('plugin_implement#')) {
+                    real_key = key.replace('plugin_implement#', '')
+                    old_lang = lang === 'zh' ? 'en' : 'zh';
+                    let text = element.textContent;
+                    text = text.replace(i18nConfig[old_lang][real_key], i18nConfig[lang][real_key]);
+                    text = text.replace(i18nConfig[old_lang][real_key], i18nConfig[lang][real_key]);
+                    element.textContent = text;
+                }
+            });
+
+            // 更新所有带有data-i18n-placeholder属性的元素
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-i18n-placeholder');
+                console.log(key)
+                if (i18nConfig[lang] && i18nConfig[lang][key]) {
+                    element.placeholder = i18nConfig[lang][key];
+                }
+            });
+
+            // 重新渲染动态内容
+            renderDynamicContent();
+        }
+
+        // 渲染动态内容
+        function renderDynamicContent() {
+            // 重新渲染指标表格表头
+            if (typeof renderMetricsTable === 'function') {
+                renderMetricsTable();
+            }
+
+            // 重新渲染图表标题
+            if (globalData.chartInstance) {
+                globalData.chartInstance.options.scales.y.title.text = i18nConfig[currentLanguage]['charts.y-axis-title'];
+                globalData.chartInstance.options.scales.x.title.text = i18nConfig[currentLanguage]['charts.x-axis-title'];
+                globalData.chartInstance.update();
+            }
+        }
+
+        // 全局数据存储
+        const globalData = {
+            resultPath: '',
+            evalConfig: null,
+            benchmarkConfigs: null,
+            datasets: {},
+            currentDataset: '',
+            currentPage: 1,
+            itemsPerPage: 10,
+            filteredData: [],
+            chartInstance: null,
+            chartType: 'bar',
+            flowGroups: {}, // 存储流程图分组信息
+            flowGroupNames: {} // 存储流程图名称映射
+        };
+
+        // 获取URL参数
+        function getUrlParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // 设置URL参数
+        function setUrlParam(param, value) {
+            const url = new URL(window.location.href);
+            url.searchParams.set(param, value);
+            window.history.pushState({}, '', url);
+        }
+
+        // 初始化函数
+        async function init() {
+            // 从URL获取结果路径参数
+            const pathParam = getUrlParam('path');
+            const baseDir = window.location.pathname.split('/').slice(0, -1).join('/');
+            if (!pathParam) {
+                return;
+            }
+            globalData.resultPath = pathParam;
+            if (!pathParam.startsWith('/')) {
+                globalData.resultPath = `../../${pathParam}`;
+            }
+            await loadData(globalData.resultPath);
+        }
+
+        // 加载数据
+        async function loadData(path) {
+            try {
+                // 清空现有数据
+                globalData.evalConfig = null;
+                globalData.benchmarkConfigs = null;
+                globalData.datasets = {};
+                globalData.currentDataset = '';
+
+
+                // 加载评测配置
+                const evalConfigResponse = await fetch(`${path}/eval_config.json`);
+                globalData.evalConfig = await evalConfigResponse.json();
+
+                // 加载任务描述
+                const benchmarkConfigsResponse = await fetch(`${path}/benchmark_config.json`);
+                globalData.benchmarkConfigs = await benchmarkConfigsResponse.json();
+
+                // 获取所有数据集目录
+                const datasetDirs = globalData.benchmarkConfigs.map(config => config.benchmark);
+
+                // 加载每个数据集的数据
+                for (const dataset of datasetDirs) {
+                    try {
+                        const statsResponse = await fetch(`${path}/${dataset}/stats.json`);
+                        const perInstanceStatsResponse = await fetch(`${path}/${dataset}/per_instance_stats.json`);
+                        const scenarioStateResponse = await fetch(`${path}/${dataset}/scenario_state.json`);
+
+                        const stats = await statsResponse.json();
+                        const perInstanceStats = await perInstanceStatsResponse.json();
+                        const scenarioState = await scenarioStateResponse.json();
+
+                        globalData.datasets[dataset] = {
+                            stats,
+                            perInstanceStats,
+                            scenarioState
+                        };
+                    } catch (error) {
+                        console.error(`Error loading data for dataset ${dataset}:`, error);
+                    }
+                }
+
+                // 设置当前数据集
+                if (datasetDirs.length > 0) {
+                    globalData.currentDataset = datasetDirs[0];
+                }
+
+                // 渲染UI
+                renderConfigTable();
+                renderDatasetSelects();
+                renderMetricsTable();
+                renderMetricsChart();
+                renderDetailsTable();
+
+                return true;
+            } catch (error) {
+                console.error('初始化失败:', error);
+                alert(`加载数据失败: ${error.message}\n请检查路径是否正确，以及服务器是否正在运行。`);
+                return false;
+            }
+        }
+
+        // 渲染评测配置表格
+        function renderConfigTable() {
+            const tableBody = document.getElementById('config-table-body');
+            tableBody.innerHTML = '';
+
+            if (globalData.evalConfig) {
+                for (const [key, value] of Object.entries(globalData.evalConfig)) {
+                    const row = document.createElement('tr');
+
+                    const keyCell = document.createElement('td');
+                    keyCell.textContent = key;
+                    row.appendChild(keyCell);
+
+                    const valueCell = document.createElement('td');
+                    if (typeof value === 'object') {
+                        const pre = document.createElement('pre');
+                        pre.className = 'json-viewer';
+                        pre.textContent = JSON.stringify(value, null, 2);
+                        valueCell.appendChild(pre);
+                    } else {
+                        valueCell.textContent = value;
+                    }
+                    row.appendChild(valueCell);
+
+                    tableBody.appendChild(row);
+                }
+            }
+        }
+
+        // 分析流程图并进行分类
+        function analyzeFlowGroups() {
+            console.log('=== 开始分析流程图分类 ===');
+
+            if (!globalData.benchmarkConfigs) {
+                console.log('❌ benchmarkConfigs 为空，无法进行流程图分析');
+                return;
+            }
+
+            console.log(`📊 总共有 ${globalData.benchmarkConfigs.length} 个数据集配置需要分析`);
+
+            const flowSignatures = {};
+            const flowGroups = {};
+            let groupCounter = 1;
+
+            // 清空之前的分组信息
+            globalData.flowGroups = {};
+            globalData.flowGroupNames = {};
+
+            // 为每个数据集生成流程签名
+            globalData.benchmarkConfigs.forEach((config, index) => {
+                const dataset = config.benchmark;
+                console.log(`\n🔍 分析数据集 [${index + 1}/${globalData.benchmarkConfigs.length}]: ${dataset}`);
+
+                // 打印流程阶段详情
+                console.log(`   📋 该数据集有 ${config.flow_stages.length} 个流程阶段:`);
+                config.flow_stages.forEach((stage, stageIndex) => {
+                    console.log(`      ${stageIndex + 1}. ${stage.plugin_implement}`);
+                    if (stage.plugins && stage.plugins.length > 0) {
+                        console.log(`         └─ 包含 ${stage.plugins.length} 个插件: ${stage.plugins.map(p => p.plugin_implement).join(', ')}`);
+                    }
+                });
+
+                // 生成流程签名：只考虑阶段的plugin_implement和数量，不考虑具体插件
+                const stageSignature = config.flow_stages.map(stage => stage.plugin_implement).join('->');
+                console.log(`   🔑 生成的流程签名: "${stageSignature}"`);
+
+                if (!flowSignatures[stageSignature]) {
+                    // 新的流程类型
+                    const groupName = `${i18nConfig[currentLanguage]['flow.flow-chart']}-${groupCounter}`;
+                    flowSignatures[stageSignature] = groupName;
+                    flowGroups[groupName] = [];
+                    console.log(`   ✨ 发现新的流程类型，创建分组: ${groupName}`);
+                    groupCounter++;
+                } else {
+                    console.log(`   🔄 匹配到已存在的流程类型: ${flowSignatures[stageSignature]}`);
+                }
+
+                // 记录数据集所属的流程图分组
+                const groupName = flowSignatures[stageSignature];
+                globalData.flowGroupNames[dataset] = groupName;
+                flowGroups[groupName].push(dataset);
+                console.log(`   📌 数据集 "${dataset}" 归类到: ${groupName}`);
+            });
+
+            globalData.flowGroups = flowGroups;
+
+            // 输出最终分组结果
+            console.log('\n=== 流程图分类完成 ===');
+            console.log(`🎯 总共识别出 ${Object.keys(flowGroups).length} 种不同的流程图类型:`);
+
+            Object.entries(flowGroups).forEach(([groupName, datasets]) => {
+                console.log(`\n📊 ${groupName}:`);
+                console.log(`   包含数据集: ${datasets.join(', ')}`);
+                console.log(`   数据集数量: ${datasets.length}`);
+
+                // 显示该分组的流程签名
+                const firstDataset = datasets[0];
+                const config = globalData.benchmarkConfigs.find(c => c.benchmark === firstDataset);
+                if (config) {
+                    const signature = config.flow_stages.map(stage => stage.plugin_implement).join('->');
+                    console.log(`   流程签名: "${signature}"`);
+                }
+            });
+
+            console.log('\n📋 完整的分组映射表:');
+            Object.entries(globalData.flowGroupNames).forEach(([dataset, group]) => {
+                console.log(`   ${dataset} → ${group}`);
+            });
+
+            console.log('\n=== 流程图分析结束 ===\n');
+            console.log('流程图分组结果:', globalData.flowGroups);
+            console.log('数据集分组映射:', globalData.flowGroupNames);
+        }
+
+        // 渲染评测详情页面的数据集选择器（显示所有数据集）
+        function renderDetailsDatasetSelect() {
+            const datasetSearchInput = document.getElementById('dataset-search-input');
+            const datasetDropdown = document.getElementById('dataset-dropdown');
+            datasetDropdown.innerHTML = '';
+
+            // 按字母顺序排列所有数据集
+            const allDatasets = Object.keys(globalData.datasets).sort();
+
+            // 创建搜索功能
+            let filteredDatasets = allDatasets;
+
+            function updateDropdown(datasets) {
+                datasetDropdown.innerHTML = '';
+                datasets.forEach(dataset => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.className = 'dropdown-item';
+                    a.href = '#';
+                    a.textContent = dataset;
+                    a.title = dataset;
+                    a.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        globalData.currentDataset = dataset;
+                        datasetSearchInput.value = dataset;
+                        globalData.currentPage = 1;
+                        renderMetricSelect(); // 更新指标选择器
+                        renderDetailsTable();
+                        // 关闭下拉菜单
+                        const dropdown = bootstrap.Dropdown.getInstance(datasetSearchInput);
+                        if (dropdown) dropdown.hide();
+                    });
+                    li.appendChild(a);
+                    datasetDropdown.appendChild(li);
+                });
+            }
+
+            // 初始化下拉菜单
+            updateDropdown(allDatasets);
+
+            // 添加搜索功能
+            datasetSearchInput.addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase();
+                filteredDatasets = allDatasets.filter(dataset =>
+                    dataset.toLowerCase().includes(searchTerm)
+                );
+                updateDropdown(filteredDatasets);
+            });
+
+            // 设置默认选中的数据集
+            if (globalData.currentDataset && allDatasets.includes(globalData.currentDataset)) {
+                datasetSearchInput.value = globalData.currentDataset;
+            } else if (allDatasets.length > 0) {
+                globalData.currentDataset = allDatasets[0];
+                datasetSearchInput.value = globalData.currentDataset;
+            }
+
+            // 点击输入框时清空内容以便搜索
+            datasetSearchInput.addEventListener('focus', function () {
+                if (this.hasAttribute('readonly')) {
+                    this.removeAttribute('readonly');
+                    this.value = '';
+                }
+            });
+
+            // 失去焦点时恢复只读状态
+            datasetSearchInput.addEventListener('blur', function () {
+                setTimeout(() => {
+                    this.setAttribute('readonly', 'readonly');
+                    if (!this.value && globalData.currentDataset) {
+                        this.value = globalData.currentDataset;
+                    }
+                }, 200);
+            });
+        }
+
+
+
+        // 渲染指标选择器
+        function renderMetricSelect() {
+            const metricSelect = document.getElementById('metric-select');
+            metricSelect.innerHTML = `<option value="" data-i18n="options.select-metric">${i18nConfig[currentLanguage]['options.select-metric']}</option>`;
+
+            const dataset = globalData.currentDataset;
+            const datasetData = globalData.datasets[dataset];
+
+            if (datasetData && datasetData.stats) {
+                const metrics = datasetData.stats.map(stat => stat.name.name).sort();
+                metrics.forEach((metric, index) => {
+                    const option = document.createElement('option');
+                    option.value = metric;
+                    option.textContent = metric;
+                    metricSelect.appendChild(option);
+                });
+
+                // 默认选中第一个指标
+                if (metrics.length > 0) {
+                    metricSelect.value = metrics[0];
+                }
+            }
+        }
+
+        // 渲染数据集选择器（保持向后兼容）
+        // 渲染数据集选择器
+        function renderDatasetSelects() {
+            const datasetSelect = document.getElementById('dataset-search-input');
+
+            // 清空现有选项
+            if (datasetSelect) {
+                // 对于评测详情页面，保持原有的搜索选择器功能
+                renderDetailsDatasetSelect();
+            }
+
+            // 分析流程图分组
+            analyzeFlowGroups();
+
+            // 渲染流程图分组tabs
+            renderFlowGroupTabs();
+
+            // 渲染指标选择器
+            renderMetricSelect();
+        }
+
+        // 渲染流程图分组tabs
+        function renderFlowGroupTabs() {
+            const flowGroupTabs = document.getElementById('flowGroupTabs');
+            const flowGroupTabContent = document.getElementById('flowGroupTabContent');
+
+            if (!flowGroupTabs || !flowGroupTabContent) return;
+
+            // 清空现有内容
+            flowGroupTabs.innerHTML = '';
+            flowGroupTabContent.innerHTML = '';
+
+            const groupNames = Object.keys(globalData.flowGroups).sort();
+
+            groupNames.forEach((groupName, index) => {
+                const datasets = globalData.flowGroups[groupName];
+                const isActive = index === 0;
+                const tabId = `flowGroup${index + 1}`;
+                const panelId = `flowGroupPanel${index + 1}`;
+
+                // 创建tab标签
+                const tabLi = document.createElement('li');
+                tabLi.className = 'nav-item';
+                tabLi.setAttribute('role', 'presentation');
+
+                const tabButton = document.createElement('button');
+                tabButton.className = `nav-link ${isActive ? 'active' : ''}`;
+                tabButton.id = `${tabId}-tab`;
+                tabButton.setAttribute('data-bs-toggle', 'tab');
+                tabButton.setAttribute('data-bs-target', `#${panelId}`);
+                tabButton.setAttribute('type', 'button');
+                tabButton.setAttribute('role', 'tab');
+                tabButton.setAttribute('aria-controls', panelId);
+                tabButton.setAttribute('aria-selected', isActive.toString());
+                tabButton.setAttribute('data-i18n', 'flow.flow-chart&flow.dataset-count');
+                tabButton.textContent = `${groupName} (${datasets.length}${i18nConfig[currentLanguage]['flow.dataset-count']})`;
+
+                // 添加tab切换事件监听器
+                tabButton.addEventListener('shown.bs.tab', function () {
+                    console.log(`🔄 切换到流程图分组: ${groupName}`);
+
+                    // 隐藏所有其他面板
+                    const allPanels = document.querySelectorAll('#flowGroupTabContent .tab-pane');
+                    allPanels.forEach(panel => {
+                        panel.style.display = 'none';
+                    });
+
+                    // 显示当前面板
+                    const panel = document.getElementById(panelId);
+                    if (panel) {
+                        panel.style.display = 'block';
+                        // 检查面板是否已经有内容，如果没有则渲染
+                        if (panel.children.length === 0) {
+                            renderFlowGroupContent(groupName, panelId);
+                        } else {
+                            // 如果面板已经有内容，检查是否需要重新渲染流程图
+                            const flowDiagram = panel.querySelector('.flow-diagram');
+                            if (flowDiagram && flowDiagram.innerHTML === '') {
+                                // 获取数据集选择器的值
+                                const searchInput = panel.querySelector(`#flow-dataset-search-${panelId}`);
+                                if (searchInput) {
+                                    const dataset = searchInput.value;
+                                    if (dataset) {
+                                        renderFlowDiagram(panelId);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                tabLi.appendChild(tabButton);
+                flowGroupTabs.appendChild(tabLi);
+
+                // 创建tab内容面板
+                const tabPanel = document.createElement('div');
+                tabPanel.className = `tab-pane fade ${isActive ? 'show active' : ''}`;
+                tabPanel.id = panelId;
+                tabPanel.setAttribute('role', 'tabpanel');
+                tabPanel.setAttribute('aria-labelledby', `${tabId}-tab`);
+                tabPanel.style.height = '100%';
+                // 如果不是激活状态，隐藏且不占空间
+                if (!isActive) {
+                    tabPanel.style.display = 'none';
+                }
+
+                flowGroupTabContent.appendChild(tabPanel);
+
+                // 如果是第一个tab，延迟渲染内容以确保容器尺寸正确
+                if (isActive) {
+                    setTimeout(() => {
+                        renderFlowGroupContent(groupName, panelId);
+                    }, 150);
+                }
+            });
+        }
+
+        // 渲染流程图分组内容
+        function renderFlowGroupContent(groupName, panelId) {
+            const panel = document.getElementById(panelId);
+            if (!panel) return;
+
+            const datasets = globalData.flowGroups[groupName];
+            console.log(`📊 渲染流程图分组 "${groupName}" 的内容，包含 ${datasets.length} 个数据集`);
+
+            // 清空面板内容
+            panel.innerHTML = '';
+
+            // 创建主容器，包含数据集选择器和流程图
+            const mainContainer = document.createElement('div');
+            mainContainer.className = 'd-flex flex-column';
+
+            // 创建数据集选择器容器（顶部，左侧占一半宽度）
+            const selectorContainer = document.createElement('div');
+            selectorContainer.className = 'd-flex justify-content-start align-items-center mb-3 p-3';
+            selectorContainer.style.backgroundColor = '#f8f9fa';
+            selectorContainer.style.borderRadius = '0.375rem';
+
+            // 创建可搜索的数据集选择器容器
+            const searchableSelectContainer = document.createElement('div');
+            searchableSelectContainer.className = 'searchable-select';
+            searchableSelectContainer.style.width = '50%';
+            searchableSelectContainer.style.position = 'relative';
+
+            // 创建搜索输入框
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'form-control';
+            searchInput.id = `flow-dataset-search-${panelId}`;
+            searchInput.placeholder = i18nConfig[currentLanguage]['flow.select-dataset'];
+            searchInput.setAttribute('readonly', 'readonly');
+            searchInput.setAttribute('data-bs-toggle', 'dropdown');
+            searchInput.setAttribute('aria-expanded', 'false');
+            searchInput.setAttribute('data-i18n-placeholder', 'flow.select-dataset');
+            searchInput.style.cursor = 'pointer';
+
+            // 创建下拉菜单
+            const dropdown = document.createElement('ul');
+            dropdown.className = 'dropdown-menu';
+            dropdown.id = `flow-dataset-dropdown-${panelId}`;
+            dropdown.style.width = '100%';
+            dropdown.style.maxHeight = '300px';
+            dropdown.style.overflowY = 'auto';
+
+            // 存储所有数据集和过滤后的数据集
+            let allDatasets = datasets.filter(dataset => globalData.datasets[dataset]);
+            let filteredDatasets = [...allDatasets];
+
+            // 更新下拉菜单的函数
+            function updateDropdown(datasetsToShow) {
+                dropdown.innerHTML = '';
+                datasetsToShow.forEach(dataset => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.className = 'dropdown-item';
+                    a.href = '#';
+                    a.textContent = dataset;
+                    a.title = dataset;
+                    a.style.whiteSpace = 'nowrap';
+                    a.style.overflow = 'hidden';
+                    a.style.textOverflow = 'ellipsis';
+
+                    a.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        globalData.currentDataset = dataset;
+                        searchInput.value = dataset;
+                        renderFlowDiagram(panelId);
+                        // 关闭下拉菜单
+                        const bsDropdown = bootstrap.Dropdown.getInstance(searchInput);
+                        if (bsDropdown) bsDropdown.hide();
+                    });
+
+                    li.appendChild(a);
+                    dropdown.appendChild(li);
+                });
+            }
+
+            // 初始化下拉菜单
+            updateDropdown(allDatasets);
+
+            // 添加搜索功能
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase();
+                filteredDatasets = allDatasets.filter(dataset =>
+                    dataset.toLowerCase().includes(searchTerm)
+                );
+                updateDropdown(filteredDatasets);
+            });
+
+            // 设置默认选中的数据集
+            if (allDatasets.length > 0) {
+                const defaultDataset = allDatasets[0];
+                searchInput.value = defaultDataset;
+                globalData.currentDataset = defaultDataset;
+            }
+
+            // 点击输入框时清空内容以便搜索
+            searchInput.addEventListener('focus', function () {
+                if (this.hasAttribute('readonly')) {
+                    this.removeAttribute('readonly');
+                    this.value = '';
+                }
+            });
+
+            // 失去焦点时恢复只读状态
+            searchInput.addEventListener('blur', function () {
+                setTimeout(() => {
+                    this.setAttribute('readonly', 'readonly');
+                    if (!this.value && globalData.currentDataset) {
+                        this.value = globalData.currentDataset;
+                    }
+                }, 200);
+            });
+
+            // 组装搜索选择器
+            searchableSelectContainer.appendChild(searchInput);
+            searchableSelectContainer.appendChild(dropdown);
+            selectorContainer.appendChild(searchableSelectContainer);
+
+            // 创建流程图容器
+            const flowDiagram = document.createElement('div');
+            flowDiagram.className = 'flow-diagram';
+            flowDiagram.id = `flow-diagram-${panelId}`;
+
+            // 组装容器
+            mainContainer.appendChild(selectorContainer);
+            mainContainer.appendChild(flowDiagram);
+            panel.appendChild(mainContainer);
+
+            // 渲染流程图
+            renderFlowDiagram(panelId);
+        }
+
+        // 渲染指标表格
+        function renderMetricsTable(filterText = '') {
+            const tableHeader = document.getElementById('metrics-table-header');
+            const tableBody = document.getElementById('metrics-table-body');
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // 收集所有指标名称和详细信息
+            const allMetrics = new Set();
+            const metricDetails = new Map(); // 存储指标的详细信息
+
+            // 过滤数据集
+            const filteredDatasets = {};
+            for (const dataset in globalData.datasets) {
+                if (filterText === '' || dataset.toLowerCase().includes(filterText.toLowerCase())) {
+                    filteredDatasets[dataset] = globalData.datasets[dataset];
+                }
+            }
+
+            for (const dataset in filteredDatasets) {
+                const datasetData = filteredDatasets[dataset];
+                if (datasetData.stats) {
+                    datasetData.stats.forEach(stat => {
+                        const metricName = stat.name.name;
+                        allMetrics.add(metricName);
+
+                        // 存储指标的详细信息
+                        if (!metricDetails.has(metricName)) {
+                            metricDetails.set(metricName, {
+                                name: metricName,
+                                // 可以根据需要添加更多属性，比如单位、描述等
+                            });
+                        }
+                    });
+                }
+            }
+
+            const metricsArray = Array.from(allMetrics).sort();
+            const datasetCount = Object.keys(filteredDatasets).length;
+
+            // 计算每个指标列的宽度（50%总宽度均分）
+            const metricColumnWidth = metricsArray.length > 0 ? (50 / metricsArray.length) + '%' : '0%';
+
+            // 创建多层表头结构
+            // 第一层表头（指标分组）
+            const firstHeaderRow = document.createElement('tr');
+
+            // 数据集列（跨两行）- 设置40%宽度
+            const datasetHeaderCell = document.createElement('th');
+            datasetHeaderCell.textContent = `${i18nConfig[currentLanguage]['metrics.dataset']} (${Object.keys(filteredDatasets).length}${i18nConfig[currentLanguage]['flow.dataset-count']})`;
+            datasetHeaderCell.rowSpan = 2;
+            datasetHeaderCell.style.verticalAlign = 'middle';
+            datasetHeaderCell.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+            datasetHeaderCell.style.color = 'white';
+            datasetHeaderCell.style.fontWeight = '700';
+            datasetHeaderCell.style.textShadow = '0 1px 2px rgba(0,0,0,0.2)';
+            datasetHeaderCell.style.width = '40%';
+            datasetHeaderCell.style.minWidth = '40%';
+            datasetHeaderCell.style.maxWidth = '40%';
+            firstHeaderRow.appendChild(datasetHeaderCell);
+
+            // 指标分组表头（合并所有指标列）- 设置50%宽度
+            if (metricsArray.length > 0) {
+                const metricsGroupHeaderCell = document.createElement('th');
+                metricsGroupHeaderCell.textContent = i18nConfig[currentLanguage]['metrics.metrics'];
+                metricsGroupHeaderCell.colSpan = metricsArray.length;
+                metricsGroupHeaderCell.style.textAlign = 'center';
+                metricsGroupHeaderCell.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                metricsGroupHeaderCell.style.color = 'white';
+                metricsGroupHeaderCell.style.fontWeight = '700';
+                metricsGroupHeaderCell.style.textShadow = '0 1px 2px rgba(0,0,0,0.2)';
+                metricsGroupHeaderCell.style.width = '50%';
+                metricsGroupHeaderCell.style.minWidth = '50%';
+                metricsGroupHeaderCell.style.maxWidth = '50%';
+                firstHeaderRow.appendChild(metricsGroupHeaderCell);
+            }
+
+            // 样本数列（跨两行）- 设置10%宽度
+            const sampleCountHeaderCell = document.createElement('th');
+            sampleCountHeaderCell.textContent = i18nConfig[currentLanguage]['metrics.sample-count'];
+            sampleCountHeaderCell.rowSpan = 2;
+            sampleCountHeaderCell.style.verticalAlign = 'middle';
+            sampleCountHeaderCell.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+            sampleCountHeaderCell.style.color = 'white';
+            sampleCountHeaderCell.style.fontWeight = '700';
+            sampleCountHeaderCell.style.textShadow = '0 1px 2px rgba(0,0,0,0.2)';
+            sampleCountHeaderCell.style.width = '10%';
+            sampleCountHeaderCell.style.minWidth = '10%';
+            sampleCountHeaderCell.style.maxWidth = '10%';
+            firstHeaderRow.appendChild(sampleCountHeaderCell);
+
+            tableHeader.appendChild(firstHeaderRow);
+
+            // 第二层表头（具体指标名称）
+            const secondHeaderRow = document.createElement('tr');
+
+            metricsArray.forEach((metric, index) => {
+                const metricHeaderCell = document.createElement('th');
+                metricHeaderCell.textContent = metric;
+                metricHeaderCell.style.background = 'linear-gradient(135deg, var(--primary-light), #f7fafc)';
+                metricHeaderCell.style.fontWeight = '600';
+                metricHeaderCell.style.textAlign = 'center';
+                metricHeaderCell.style.fontSize = '0.9em';
+                metricHeaderCell.style.color = 'var(--text-primary)';
+                // 为指标列设置百分比宽度
+                metricHeaderCell.style.width = metricColumnWidth;
+                metricHeaderCell.style.minWidth = metricColumnWidth;
+                metricHeaderCell.style.maxWidth = metricColumnWidth;
+                secondHeaderRow.appendChild(metricHeaderCell);
+            });
+
+            tableHeader.appendChild(secondHeaderRow);
+
+            // 计算汇总数据
+            const summaryData = {};
+            let totalSampleCount = 0;
+
+            // 收集所有数据用于计算汇总
+            for (const dataset in filteredDatasets) {
+                const datasetData = filteredDatasets[dataset];
+                if (datasetData.stats) {
+                    datasetData.stats.forEach(stat => {
+                        const metricName = stat.name.name;
+                        if (!summaryData[metricName]) {
+                            summaryData[metricName] = { sum: 0, count: 0, sampleSum: 0 };
+                        }
+                        summaryData[metricName].sum += stat.mean;
+                        summaryData[metricName].count += 1;
+                        summaryData[metricName].sampleSum += stat.count;
+                    });
+
+                    // 计算总样本数（使用第一个指标的样本数）
+                    if (datasetData.stats.length > 0) {
+                        totalSampleCount += datasetData.stats[0].count;
+                    }
+                }
+            }
+
+            // 创建汇总行（固定在顶部）
+            const summaryRow = document.createElement('tr');
+            summaryRow.style.position = 'sticky';
+            summaryRow.style.top = '82px'; // 表头高度（41px + 41px）
+            summaryRow.style.backgroundColor = '#fff3cd'; // 浅黄色背景
+            summaryRow.style.zIndex = '9';
+            summaryRow.style.borderBottom = '2px solid #ffc107';
+
+            // 汇总行 - 数据集名称列
+            const summaryDatasetCell = document.createElement('td');
+            summaryDatasetCell.textContent = i18nConfig[currentLanguage]['metrics.total'];
+            summaryDatasetCell.style.fontWeight = 'bold';
+            summaryDatasetCell.style.width = '40%';
+            summaryDatasetCell.style.minWidth = '40%';
+            summaryDatasetCell.style.maxWidth = '40%';
+            summaryDatasetCell.style.backgroundColor = '#fff3cd';
+            summaryDatasetCell.style.color = '#856404';
+            summaryRow.appendChild(summaryDatasetCell);
+
+            // 汇总行 - 为每个指标创建列（算数平均值）
+            metricsArray.forEach(metric => {
+                const summaryMetricCell = document.createElement('td');
+                summaryMetricCell.style.textAlign = 'center';
+                summaryMetricCell.style.width = metricColumnWidth;
+                summaryMetricCell.style.minWidth = metricColumnWidth;
+                summaryMetricCell.style.maxWidth = metricColumnWidth;
+                summaryMetricCell.style.backgroundColor = '#fff3cd';
+                summaryMetricCell.style.fontWeight = 'bold';
+                summaryMetricCell.style.color = '#856404';
+
+                if (summaryData[metric] && summaryData[metric].count > 0) {
+                    const average = summaryData[metric].sum / summaryData[metric].count;
+                    summaryMetricCell.textContent = average.toFixed(4);
+                } else {
+                    summaryMetricCell.textContent = '-';
+                }
+                summaryRow.appendChild(summaryMetricCell);
+            });
+
+            // 汇总行 - 样本数列（总和）
+            const summarySampleCountCell = document.createElement('td');
+            summarySampleCountCell.style.textAlign = 'center';
+            summarySampleCountCell.style.fontWeight = 'bold';
+            summarySampleCountCell.style.width = '10%';
+            summarySampleCountCell.style.minWidth = '10%';
+            summarySampleCountCell.style.maxWidth = '10%';
+            summarySampleCountCell.style.backgroundColor = '#fff3cd';
+            summarySampleCountCell.style.color = '#856404';
+            summarySampleCountCell.textContent = totalSampleCount.toString();
+            summaryRow.appendChild(summarySampleCountCell);
+
+            tableBody.appendChild(summaryRow);
+
+            // 创建表格数据
+            for (const dataset in filteredDatasets) {
+                const datasetData = filteredDatasets[dataset];
+                if (datasetData.stats) {
+                    const row = document.createElement('tr');
+
+                    // 数据集名称列
+                    const datasetCell = document.createElement('td');
+                    datasetCell.textContent = dataset;
+                    datasetCell.style.fontWeight = '500';
+                    datasetCell.style.width = '40%';
+                    datasetCell.style.minWidth = '40%';
+                    datasetCell.style.maxWidth = '40%';
+                    row.appendChild(datasetCell);
+
+                    // 为每个指标创建列
+                    metricsArray.forEach(metric => {
+                        const metricCell = document.createElement('td');
+                        metricCell.style.textAlign = 'center';
+                        metricCell.style.width = metricColumnWidth;
+                        metricCell.style.minWidth = metricColumnWidth;
+                        metricCell.style.maxWidth = metricColumnWidth;
+                        const stat = datasetData.stats.find(s => s.name.name === metric);
+                        if (stat) {
+                            metricCell.textContent = stat.mean.toFixed(4);
+                        } else {
+                            metricCell.textContent = '-';
+                        }
+                        row.appendChild(metricCell);
+                    });
+
+                    // 样本数列（使用第一个指标的样本数）
+                    const sampleCountCell = document.createElement('td');
+                    sampleCountCell.style.textAlign = 'center';
+                    sampleCountCell.style.fontWeight = '500';
+                    sampleCountCell.style.width = '10%';
+                    sampleCountCell.style.minWidth = '10%';
+                    sampleCountCell.style.maxWidth = '10%';
+                    if (datasetData.stats.length > 0) {
+                        sampleCountCell.textContent = datasetData.stats[0].count;
+                    } else {
+                        sampleCountCell.textContent = '-';
+                    }
+                    row.appendChild(sampleCountCell);
+
+                    tableBody.appendChild(row);
+                }
+            }
+        }
+
+        // 渲染指标图表
+        function renderMetricsChart() {
+            const ctx = document.getElementById('metrics-chart').getContext('2d');
+
+            // 准备图表数据
+            const datasets = [];
+            const labels = [];
+            const metrics = new Set();
+
+            // 收集所有指标名称
+            for (const dataset in globalData.datasets) {
+                const datasetData = globalData.datasets[dataset];
+                if (datasetData.stats) {
+                    datasetData.stats.forEach(stat => {
+                        metrics.add(stat.name.name);
+                    });
+                }
+                labels.push(dataset);
+            }
+
+            // 为每个指标创建一个数据集
+            const colors = ['rgba(75, 192, 192, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'];
+            let colorIndex = 0;
+
+            // 初始化隐藏状态（如果不存在）
+            if (!globalData.hiddenMetrics) {
+                globalData.hiddenMetrics = new Set();
+            }
+
+            metrics.forEach(metric => {
+                const data = [];
+
+                for (const dataset in globalData.datasets) {
+                    const datasetData = globalData.datasets[dataset];
+                    if (datasetData.stats) {
+                        const metricStat = datasetData.stats.find(stat => stat.name.name === metric);
+                        data.push(metricStat ? metricStat.mean : 0);
+                    } else {
+                        data.push(0);
+                    }
+                }
+
+                datasets.push({
+                    label: metric,
+                    data: data,
+                    backgroundColor: colors[colorIndex % colors.length],
+                    borderColor: colors[colorIndex % colors.length].replace('0.7', '1'),
+                    borderWidth: 1,
+                    hidden: globalData.hiddenMetrics.has(metric)
+                });
+
+                colorIndex++;
+            });
+
+            // 创建图表
+            if (globalData.chartInstance) {
+                globalData.chartInstance.destroy();
+            }
+
+            globalData.chartInstance = new Chart(ctx, {
+                type: globalData.chartType,
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: globalData.chartType === 'line' ? 'index' : 'nearest',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '指标值'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '数据集'
+                            },
+                            ticks: {
+                                maxRotation: 90,
+                                minRotation: 90
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            onClick: function (e, legendItem, legend) {
+                                const index = legendItem.datasetIndex;
+                                const chart = legend.chart;
+                                const meta = chart.getDatasetMeta(index);
+                                const metricName = legendItem.text;
+
+                                // 检查是否只剩一个可见的指标
+                                const visibleCount = chart.data.datasets.filter((dataset, i) =>
+                                    !chart.getDatasetMeta(i).hidden
+                                ).length;
+
+                                // 如果当前指标可见且只剩一个可见指标，则不允许隐藏
+                                if (!meta.hidden && visibleCount <= 1) {
+                                    return;
+                                }
+
+                                // 切换显示状态
+                                meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+
+                                // 更新全局隐藏状态
+                                if (meta.hidden) {
+                                    globalData.hiddenMetrics.add(metricName);
+                                } else {
+                                    globalData.hiddenMetrics.delete(metricName);
+                                }
+
+                                chart.update();
+                            }
+                        },
+                        title: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: globalData.chartType === 'line' ? 'index' : 'nearest',
+                            intersect: false,
+                        }
+                    }
+                }
+            });
+        }
+
+        // 渲染详细评测结果表格
+        function renderDetailsTable() {
+            const dataset = globalData.currentDataset;
+            const datasetData = globalData.datasets[dataset];
+
+            if (!datasetData) return;
+
+            // 准备数据
+            const detailsData = [];
+
+            if (datasetData.perInstanceStats && datasetData.scenarioState) {
+                const perInstanceStats = datasetData.perInstanceStats;
+                const scenarioState = datasetData.scenarioState;
+
+                scenarioState.request_states.forEach(requestState => {
+                    const instanceId = requestState.instance.id;
+                    const instanceStats = perInstanceStats.find(stat => stat.instance_id === instanceId);
+
+                    if (instanceStats) {
+                        const question = requestState.instance.input.text;
+                        const modelInput = JSON.stringify(requestState.request.messages, null, 2);
+                        const modelOutput = requestState.result.completions[0].text;
+
+                        // 找到正确答案（支持多选题）
+                        let correctAnswers = [];
+                        requestState.instance.references.forEach(ref => {
+                            if (ref.tags && ref.tags.includes('correct')) {
+                                correctAnswers.push(ref.output.text);
+                            }
+                        });
+                        const correctAnswer = correctAnswers.length > 1
+                            ? correctAnswers.join('、')
+                            : (correctAnswers.length === 1 ? correctAnswers[0] : '');
+
+                        // 获取指标值
+                        const metrics = {};
+                        let meanScore = 0;
+                        const selectedMetric = document.getElementById('metric-select').value;
+
+                        instanceStats.stats.forEach(stat => {
+                            metrics[stat.name.name] = stat.mean;
+                            // 如果选择了特定指标，使用该指标；否则使用第一个指标
+                            if (selectedMetric && stat.name.name === selectedMetric) {
+                                meanScore = stat.mean;
+                            } else if (!selectedMetric) {
+                                meanScore = stat.mean; // 使用第一个指标
+                            }
+                        });
+
+                        // 如果没有找到选中的指标，使用第一个可用指标
+                        if (selectedMetric && meanScore === 0 && instanceStats.stats.length > 0) {
+                            meanScore = instanceStats.stats[0].mean;
+                        }
+
+                        detailsData.push({
+                            id: instanceId,
+                            question,
+                            correctAnswer,
+                            modelInput,
+                            modelOutput,
+                            meanScore
+                        });
+                    }
+                });
+            }
+
+            // 保存过滤后的数据
+            globalData.filteredData = detailsData;
+
+            // 渲染分页
+            renderPagination();
+
+            // 渲染表格
+            renderDetailsTablePage();
+        }
+
+        // 渲染分页控件
+        function renderPagination() {
+            const paginationControls = document.getElementById('pagination-controls');
+            paginationControls.innerHTML = '';
+
+            const totalPages = Math.ceil(globalData.filteredData.length / globalData.itemsPerPage);
+
+            // 上一页按钮
+            const prevBtn = document.createElement('a');
+            prevBtn.className = `pagination-btn ${globalData.currentPage === 1 ? 'disabled' : ''}`;
+            prevBtn.href = '#';
+            prevBtn.innerHTML = '<';
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (globalData.currentPage > 1) {
+                    globalData.currentPage--;
+                    renderDetailsTablePage();
+                    renderPagination();
+                }
+            });
+            paginationControls.appendChild(prevBtn);
+
+            // 页码按钮
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, globalData.currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('a');
+                pageBtn.className = `pagination-btn ${i === globalData.currentPage ? 'active' : ''}`;
+                pageBtn.href = '#';
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    globalData.currentPage = i;
+                    renderDetailsTablePage();
+                    renderPagination();
+                });
+                paginationControls.appendChild(pageBtn);
+            }
+
+            // 下一页按钮
+            const nextBtn = document.createElement('a');
+            nextBtn.className = `pagination-btn ${globalData.currentPage === totalPages ? 'disabled' : ''}`;
+            nextBtn.href = '#';
+            nextBtn.innerHTML = '>';
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (globalData.currentPage < totalPages) {
+                    globalData.currentPage++;
+                    renderDetailsTablePage();
+                    renderPagination();
+                }
+            });
+            paginationControls.appendChild(nextBtn);
+        }
+
+        // 渲染详细评测结果表格的当前页
+        function renderDetailsTablePage() {
+            const tableBody = document.getElementById('details-table-body');
+            tableBody.innerHTML = '';
+
+            const start = (globalData.currentPage - 1) * globalData.itemsPerPage;
+            const end = Math.min(start + globalData.itemsPerPage, globalData.filteredData.length);
+
+            for (let i = start; i < end; i++) {
+                const item = globalData.filteredData[i];
+                const row = document.createElement('tr');
+
+                // ID列
+                const idCell = document.createElement('td');
+                idCell.textContent = item.id;
+                row.appendChild(idCell);
+
+                // 问题列
+                const questionCell = document.createElement('td');
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'cell-content';
+                questionDiv.textContent = item.question;
+                questionCell.appendChild(questionDiv);
+                row.appendChild(questionCell);
+
+                // 正确答案列
+                const answerCell = document.createElement('td');
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'cell-content';
+                answerDiv.textContent = item.correctAnswer;
+                answerCell.appendChild(answerDiv);
+                row.appendChild(answerCell);
+
+                // 模型输入列
+                const inputCell = document.createElement('td');
+                const inputDiv = document.createElement('div');
+                inputDiv.className = 'cell-content';
+
+                // 解析JSON并提取content字段
+                try {
+                    const messages = JSON.parse(item.modelInput);
+                    let contentText = '';
+
+                    if (Array.isArray(messages)) {
+                        messages.forEach((msg, index) => {
+                            if (msg.content) {
+                                if (contentText) contentText += '\n\n';
+                                contentText += `${msg.content}`;
+                            }
+                        });
+                    }
+
+                    inputDiv.textContent = contentText || item.modelInput;
+                } catch (e) {
+                    // 如果解析失败，显示原始输入
+                    inputDiv.textContent = item.modelInput;
+                }
+
+                inputCell.appendChild(inputDiv);
+                row.appendChild(inputCell);
+
+                // 模型输出列
+                const outputCell = document.createElement('td');
+                const outputDiv = document.createElement('div');
+                outputDiv.className = 'cell-content';
+                outputDiv.textContent = item.modelOutput;
+                outputCell.appendChild(outputDiv);
+                row.appendChild(outputCell);
+
+                // 得分列
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = item.meanScore.toFixed(4);
+                row.appendChild(scoreCell);
+
+                tableBody.appendChild(row);
+            }
+
+            // 更新分页摘要信息
+            const paginationSummary = document.getElementById('pagination-summary');
+            if (globalData.filteredData.length === 0) {
+                paginationSummary.textContent = i18nConfig[currentLanguage]['pagination.no-data'];
+            } else {
+                paginationSummary.textContent = `${i18nConfig[currentLanguage]['pagination.total'].replace('0', globalData.filteredData.length)}`;
+            }
+        }
+
+        // 渲染流程图
+        function renderFlowDiagram(panelId) {
+            // 根据panelId确定选择器和容器的ID
+            const searchInputId = panelId ? `flow-dataset-search-${panelId}` : 'flow-dataset-select';
+            const diagramId = panelId ? `flow-diagram-${panelId}` : 'flow-diagram';
+
+            const searchInputElement = document.getElementById(searchInputId);
+            const dataset = searchInputElement ? searchInputElement.value : globalData.currentDataset;
+
+            console.log('\n🎨 === 开始渲染流程图 ===');
+            console.log(`📋 当前选择的数据集: ${dataset}`);
+            console.log(`📋 目标容器: ${diagramId}`);
+
+            const flowDiagram = document.getElementById(diagramId);
+            if (!flowDiagram) {
+                console.error(`❌ 找不到流程图容器: ${diagramId}`);
+                return;
+            }
+
+            flowDiagram.innerHTML = '';
+
+            if (!globalData.benchmarkConfigs) return;
+
+            const benchmarkConfig = globalData.benchmarkConfigs.find(config => config.benchmark === dataset);
+            if (!benchmarkConfig) {
+                return;
+            }
+            console.log(`✅ 找到数据集配置，包含 ${benchmarkConfig.flow_stages.length} 个流程阶段`);
+
+            // 由于已移除标题栏，这里只记录日志
+            const groupName = globalData.flowGroupNames[dataset];
+            if (groupName) {
+                console.log(`🏷️ 当前渲染: ${groupName} - ${dataset}`);
+            } else {
+                console.log(`🏷️ 当前渲染: 流程图 - ${dataset}`);
+            }
+
+            try {
+                // 创建主容器，分为左右两栏
+                const mainContainer = d3.select(`#${diagramId}`)
+                    .append('div')
+                    .style('width', '100%')
+                    .style('height', '100%')
+                    .style('display', 'flex')
+                    .style('flex-direction', 'row')
+                    .style('gap', '20px')
+                    .style('padding', '20px')
+                    .style('overflow', 'auto'); // 允许主容器滚动
+
+                // 创建左侧流程图容器
+                const container = mainContainer.append('div')
+                    .attr('class', 'flow-container')
+                    .style('flex', '1')
+                    .style('position', 'relative')
+                    .style('overflow-x', 'auto') // 只允许横向滚动
+                    .style('overflow-y', 'hidden') // 禁用纵向滚动
+                    .style('display', 'flex')
+                    .style('flex-direction', 'row')
+                    .style('align-items', 'center')
+                    .style('justify-content', 'flex-start') // 左对齐，为左侧留出空白
+                    .style('padding', '20px') // 四周添加内边距
+                    .style('margin-left', '20px') // 为右侧参数面板留出空间 (350px + 20px gap)
+                    .style('margin-right', '20px') // 为右侧参数面板留出空间 (350px + 20px gap)
+                    .style('height', '100%') // 确保容器高度为100%
+                    .style('max-height', '100%'); // 限制最大高度
+
+                // 创建右侧参数展示区域
+                const parameterPanel = mainContainer.append('div')
+                    .attr('class', 'parameter-panel')
+                    .style('width', '350px')
+                    .style('height', '100%')
+                    .style('max-height', '100%') // 限制最大高度
+                    .style('background-color', '#f8f9fa')
+                    .style('border', '1px solid #dee2e6')
+                    .style('border-radius', '8px')
+                    .style('padding', '15px')
+                    .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)')
+                    .style('flex-shrink', '0') // 防止参数面板被压缩
+                    .style('position', 'sticky')
+                    .style('right', '0')
+                    .style('z-index', '100') // 确保参数面板在最上层
+                    .style('overflow', 'hidden'); // 防止参数面板溢出
+
+                // 添加参数面板标题（固定位置）
+                const parameterTitle = parameterPanel.append('div')
+                    .attr('class', 'parameter-title')
+                    .attr('data-i18n', 'flow.stage-params')
+                    .style('font-size', '16px')
+                    .style('font-weight', 'bold')
+                    .style('color', '#495057')
+                    .style('margin-bottom', '15px')
+                    .style('padding-bottom', '10px')
+                    .style('border-bottom', '2px solid #dee2e6')
+                    .style('position', 'sticky')
+                    .style('top', '0')
+                    .style('background-color', '#f8f9fa')
+                    .style('z-index', '10')
+                    .text(i18nConfig[currentLanguage]['flow.stage-params']);
+
+                // 添加参数内容区域（可滚动）
+                const parameterContent = parameterPanel.append('div')
+                    .attr('class', 'parameter-content')
+                    .style('height', 'calc(100% - 60px)') // 减去标题的高度
+                    .style('overflow-y', 'auto');
+
+                // 参数表格格式化函数
+                function formatParametersAsTable(params, title, param_type) {
+                    const domElement = parameterTitle.node(); // 获取 DOM 元素
+                    domElement.textContent = param_type;
+
+                    parameterContent.selectAll('*').remove(); // 清空内容
+
+                    // 添加参数标题（固定位置）
+                    const titleContainer = parameterContent.append('div')
+                        .style('position', 'sticky')
+                        .style('top', '0')
+                        .style('background-color', '#f8f9fa')
+                        .style('z-index', '9')
+                        .style('padding-bottom', '10px');
+
+                    titleContainer.append('h6')
+                        .style('color', '#495057')
+                        .style('margin-bottom', '10px')
+                        .style('font-weight', 'bold')
+                        .text(title);
+
+                    if (!params || Object.keys(params).length === 0) {
+                        parameterContent.append('p')
+                            .attr('data-i18n', 'flow.no-params')
+                            .style('color', '#6c757d')
+                            .style('font-style', 'italic')
+                            .text(i18nConfig[currentLanguage]['flow.no-params']);
+                        return;
+                    }
+
+                    // 创建表格容器
+                    const tableContainer = parameterContent.append('div')
+                        .style('position', 'relative');
+
+                    // 创建固定表头
+                    const headerTable = tableContainer.append('table')
+                        .attr('class', 'table table-sm')
+                        .style('margin-bottom', '0')
+                        .style('font-size', '12px')
+                        .style('position', 'sticky')
+                        .style('top', '40px') // 标题高度
+                        .style('z-index', '8')
+                        .style('background-color', '#f8f9fa');
+
+                    const thead = headerTable.append('thead');
+                    thead.append('tr')
+                        .selectAll('th')
+                        .data([i18nConfig[currentLanguage]['flow.param-name'], i18nConfig[currentLanguage]['flow.param-value']])
+                        .enter()
+                        .append('th')
+                        .attr('data-i18n', (d, i) => i === 0 ? 'flow.param-name' : 'flow.param-value')
+                        .style('background-color', '#e9ecef')
+                        .style('border', '1px solid #dee2e6')
+                        .style('padding', '8px')
+                        .style('font-weight', 'bold')
+                        .style('width', (d, i) => i === 0 ? '40%' : '60%')
+                        .text(d => d);
+
+                    // 创建可滚动的表格内容
+                    const contentTable = tableContainer.append('table')
+                        .attr('class', 'table table-sm table-striped')
+                        .style('margin-bottom', '0')
+                        .style('font-size', '12px')
+                        .style('margin-top', '-1px'); // 避免与表头重复边框
+
+                    // 表体
+                    const tbody = contentTable.append('tbody');
+
+                    Object.entries(params).forEach(([key, value]) => {
+                        const row = tbody.append('tr');
+
+                        // 参数名
+                        row.append('td')
+                            .style('border', '1px solid #dee2e6')
+                            .style('padding', '8px')
+                            .style('font-weight', '500')
+                            .style('background-color', '#f8f9fa')
+                            .style('word-break', 'break-all')
+                            .style('width', '40%')
+                            .text(key);
+
+                        // 参数值
+                        const valueCell = row.append('td')
+                            .style('border', '1px solid #dee2e6')
+                            .style('padding', '8px')
+                            .style('word-break', 'break-all')
+                            .style('width', '60%');
+
+                        if (typeof value === 'object' && value !== null) {
+                            valueCell.append('pre')
+                                .style('margin', '0')
+                                .style('font-size', '11px')
+                                .style('background-color', '#f1f3f4')
+                                .style('padding', '4px')
+                                .style('border-radius', '3px')
+                                .style('max-height', '100px')
+                                .style('overflow-y', 'auto')
+                                .text(JSON.stringify(value, null, 2));
+                        } else {
+                            valueCell.text(String(value));
+                        }
+                    });
+                }
+
+
+                const stageCount = benchmarkConfig.flow_stages.length;
+                const mainContainerElement = mainContainer.node();
+
+                // 检查容器是否可见，如果不可见则不进行重试
+                const flowDiagramElement = document.getElementById(diagramId);
+                const computedStyle = window.getComputedStyle(flowDiagramElement);
+                // 检查流程图容器及其所有父元素是否可见
+                let isVisible = computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden';
+
+                // 如果当前元素可见，继续检查父元素
+                if (isVisible) {
+                    let parent = flowDiagramElement.parentElement;
+                    while (parent && isVisible) {
+                        const parentStyle = window.getComputedStyle(parent);
+                        isVisible = parentStyle.display !== 'none' && parentStyle.visibility !== 'hidden';
+                        parent = parent.parentElement;
+                    }
+                }
+
+                // 确保容器已经渲染完成，如果宽度为0则等待一下再重新计算
+                if (mainContainerElement.clientWidth === 0) {
+                    // 只有在容器可见时才重试，避免无限循环
+                    if (isVisible) {
+                        console.log('⏳ 容器宽度为0，延迟重新渲染...');
+                        setTimeout(() => {
+                            renderFlowDiagram(panelId);
+                        }, 200);
+                    } else {
+                        console.log('⏭️ 容器不可见，跳过重试');
+                    }
+                    return;
+                }
+                const parameterPanelWidth = 370; // 参数面板宽度(350px) + margin(20px)
+                const flowAreaWidth = mainContainerElement.clientWidth - parameterPanelWidth - 40; // 减去参数面板宽度和主容器padding
+                const arrowWidth = 50; // 连接线宽度
+                const totalArrowWidth = (stageCount - 1) * arrowWidth;
+
+                // 固定节点宽度为200px
+                const containerWidth = 200;
+
+
+                // 如果节点宽度被限制到最小值，检查是否需要滚动
+                const totalRequiredWidth = (containerWidth * stageCount) + totalArrowWidth + 60;
+                const needsHorizontalScroll = totalRequiredWidth > flowAreaWidth;
+
+                console.log(`📐 宽度计算: 主容器宽度=${mainContainerElement.clientWidth}px, 流程图区域宽度=${flowAreaWidth}px, 节点数=${stageCount}, 固定宽度=${containerWidth}px, 需要滚动=${needsHorizontalScroll}`);
+
+                // 如果需要滚动，设置容器的最小宽度
+                if (needsHorizontalScroll) {
+                    container.style('min-width', `${totalRequiredWidth}px`);
+                    // 需要滚动时保持左对齐
+                    container.style('justify-content', 'flex-start');
+                } else {
+                    // 不需要滚动时居中对齐
+                    container.style('justify-content', 'center');
+                }
+
+                // 添加左侧空白区域
+                container.append('div')
+                    .style('width', '20px')
+                    .style('flex-shrink', '0');
+
+                // 固定字体大小（节点宽度固定为200px）
+                const titleFontSize = '14px';
+                const subtitleFontSize = '10px';
+                const pluginFontSize = '12px';
+                const containerPadding = '10px';
+
+                // 创建阶段容器
+                benchmarkConfig.flow_stages.forEach((stage, index) => {
+                    // 创建阶段容器
+                    const stageContainer = container.append('div')
+                        .attr('class', 'stage-container')
+                        .style('position', 'relative')
+                        .style('border', '2px solid #4dabcf')
+                        .style('border-radius', '10px')
+                        .style('background-color', '#e9f5f8')
+                        .style('padding', containerPadding)
+                        .style('box-shadow', '0 4px 8px rgba(0,0,0,0.1)')
+                        .style('width', `${containerWidth}px`)
+                        .style('height', 'fit-content')
+                        .style('display', 'flex')
+                        .style('flex-direction', 'column')
+                        .style('flex-shrink', '0'); // 防止节点被压缩
+
+                    // 添加阶段标题
+                    const stageHeader = stageContainer.append('div')
+                        .attr('class', 'stage-header')
+                        .style('font-weight', 'bold')
+                        .style('font-size', titleFontSize)
+                        .style('color', '#0d6efd')
+                        .style('margin-bottom', '15px')
+                        .style('text-align', 'center')
+                        .style('border-bottom', '1px solid #4dabcf')
+                        .style('padding-bottom', '10px');
+
+                    // 添加主标题（plugin_implement）
+                    stageHeader.append('div')
+                        .style('font-size', titleFontSize)
+                        .style('font-weight', 'bold')
+                        .style('word-wrap', 'break-word')
+                        .style('word-break', 'break-word')
+                        .style('white-space', 'normal')
+                        .style('line-height', '1.2')
+                        .text(stage.plugin_implement);
+
+                    // 如果stage与plugin_implement不同，添加副标题
+                    if (stage.stage && stage.stage !== stage.plugin_implement) {
+                        stageHeader.append('div')
+                            .style('font-size', subtitleFontSize)
+                            .style('font-weight', 'normal')
+                            .style('color', '#6c757d')
+                            .style('margin-top', '5px')
+                            .style('word-wrap', 'break-word')
+                            .style('word-break', 'break-word')
+                            .style('white-space', 'normal')
+                            .style('line-height', '1.2')
+                            .text(stage.stage);
+                    }
+
+                    // 格式化阶段参数
+                    const stageParamsText = JSON.stringify(stage.context_params, null, 2);
+
+                    // 为阶段容器添加点击事件
+                    stageContainer.on('click', function (event) {
+                        event.stopPropagation();
+                        formatParametersAsTable(stage.context_params, `${stage.plugin_implement}`, `${i18nConfig[currentLanguage]['flow.stage-params']}`);
+
+                        // 移除所有高亮状态（限制在当前容器内）
+                        d3.selectAll(`#${diagramId} .stage-container`)
+                            .style('border-color', '#4dabcf')
+                            .style('border-width', '2px')
+                            .style('box-shadow', '0 4px 8px rgba(0,0,0,0.1)')
+                            .style('background-color', '#e9f5f8')
+                            .style('transform', 'scale(1)');
+
+                        d3.selectAll(`#${diagramId} .plugin-node`)
+                            .style('border-color', '#adb5bd')
+                            .style('border-width', '1px')
+                            .style('box-shadow', '0 2px 4px rgba(0,0,0,0.05)')
+                            .style('background-color', '#ffffff')
+                            .style('transform', 'scale(1)');
+
+                        // 高亮当前阶段
+                        d3.select(this)
+                            .style('border-color', '#0d6efd')
+                            .style('border-width', '3px')
+                            .style('box-shadow', '0 8px 16px rgba(13,110,253,0.3)')
+                            .style('background-color', '#d4edda')
+                            .style('transform', 'scale(1.02)');
+                    });
+
+                    // 添加插件节点
+                    const pluginsContainer = stageContainer.append('div')
+                        .attr('class', 'plugins-container')
+                        .style('display', 'flex')
+                        .style('flex-direction', 'column')
+                        .style('gap', '5px')
+                        .style('align-items', 'center')
+                        .style('background-color', '#f5f5f5')
+                        .style('border-radius', '8px')
+                        .style('padding', '15px 10px')
+                        .style('border', '1px dashed #adb5bd');
+
+                    if (stage.plugins && Array.isArray(stage.plugins)) {
+                        stage.plugins.forEach((plugin, pluginIndex) => {
+                            // 创建插件容器
+                            const pluginContainer = pluginsContainer.append('div')
+                                .style('width', '100%');
+
+                            // 添加插件节点
+                            const pluginNode = pluginContainer.append('div')
+                                .attr('class', 'plugin-node')
+                                .style('background-color', '#ffffff')
+                                .style('border', '1px solid #adb5bd')
+                                .style('border-radius', '6px')
+                                .style('padding', '12px 15px')
+                                .style('width', '100%')
+                                .style('margin', '5px 0')
+                                .style('box-shadow', '0 2px 4px rgba(0,0,0,0.05)')
+                                .style('font-size', pluginFontSize)
+                                .style('color', '#495057')
+                                .style('word-wrap', 'break-word')
+                                .style('word-break', 'break-word')
+                                .style('white-space', 'normal')
+                                .style('line-height', '1.2')
+                                .style('text-align', 'center')
+                                .text(plugin.plugin_implement);
+
+
+                            // 格式化插件参数
+                            const pluginParamsText = JSON.stringify(plugin.context_params, null, 2);
+
+                            // 为插件节点添加点击事件
+                            pluginNode.on('click', function (event) {
+                                event.stopPropagation(); // 阻止事件冒泡到阶段容器
+                                formatParametersAsTable(plugin.context_params, `${plugin.plugin_implement}`, `${i18nConfig[currentLanguage]['flow.plugin-params']}`);
+
+                                // 移除所有高亮状态（限制在当前容器内）
+                                d3.selectAll(`#${diagramId} .stage-container`)
+                                    .style('border-color', '#4dabcf')
+                                    .style('border-width', '2px')
+                                    .style('box-shadow', '0 4px 8px rgba(0,0,0,0.1)')
+                                    .style('background-color', '#e9f5f8')
+                                    .style('transform', 'scale(1)');
+
+                                d3.selectAll(`#${diagramId} .plugin-node`)
+                                    .style('border-color', '#adb5bd')
+                                    .style('border-width', '1px')
+                                    .style('box-shadow', '0 2px 4px rgba(0,0,0,0.05)')
+                                    .style('background-color', '#ffffff')
+                                    .style('transform', 'scale(1)');
+
+                                // 高亮当前插件
+                                d3.select(this)
+                                    .style('border-color', '#0d6efd')
+                                    .style('border-width', '2px')
+                                    .style('box-shadow', '0 6px 12px rgba(13,110,253,0.3)')
+                                    .style('background-color', '#e3f2fd')
+                                    .style('transform', 'scale(1.05)');
+                            });
+
+                            // 添加插件之间的连接线（除了最后一个插件）
+                            if (pluginIndex < stage.plugins.length - 1) {
+                                // 创建连接线容器
+                                const connectorContainer = pluginContainer.append('div')
+                                    .style('width', '100%')
+                                    .style('display', 'flex')
+                                    .style('flex-direction', 'column')
+                                    .style('justify-content', 'center')
+                                    .style('align-items', 'center')
+                                    .style('margin', '0')
+                                    .style('position', 'relative');
+
+                                // 添加垂直连接线
+                                connectorContainer.append('div')
+                                    .style('width', '2px')
+                                    .style('height', '15px')
+                                    .style('background-color', '#667eea')
+                                    .style('margin', '5px 0 0 0');
+
+                                // 添加向下的箭头
+                                connectorContainer.append('div')
+                                    .style('width', '0')
+                                    .style('height', '0')
+                                    .style('border-left', '6px solid transparent')
+                                    .style('border-right', '6px solid transparent')
+                                    .style('border-top', '8px solid #667eea')
+                                    .style('margin', '0 0 5px 0')
+                                    .style('filter', 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))');
+                            }
+                        });
+                    }
+
+                    // 添加阶段间的连接线（除了最后一个阶段）
+                    if (index < benchmarkConfig.flow_stages.length - 1) {
+                        // 创建连接线容器
+                        const arrowContainer = container.append('div')
+                            .style('display', 'flex')
+                            .style('flex-direction', 'row')
+                            .style('justify-content', 'center')
+                            .style('align-items', 'center')
+                            .style('height', 'fit-content')
+                            .style('position', 'relative')
+                            .style('flex-shrink', '0');
+
+                        // 添加连接线
+                        arrowContainer.append('div')
+                            .style('width', '40px')
+                            .style('height', '2px')
+                            .style('background-color', '#4dabcf');
+
+                        // 添加箭头
+                        arrowContainer.append('div')
+                            .style('width', '0')
+                            .style('height', '0')
+                            .style('border-top', '6px solid transparent')
+                            .style('border-bottom', '6px solid transparent')
+                            .style('border-left', '10px solid #4dabcf')
+                            .style('margin-left', '-1px');
+                    }
+
+                });
+
+                // 流程图容器已经设置了横向滚动
+
+                // 默认触发第一个阶段的点击效果
+                if (benchmarkConfig.flow_stages.length > 0) {
+                    setTimeout(() => {
+                        // 使用更具体的选择器，确保选择当前容器内的第一个阶段
+                        const firstStage = d3.select(`#${diagramId} .stage-container`);
+                        if (!firstStage.empty()) {
+                            firstStage.dispatch('click');
+                            console.log('🎯 默认选中第一个阶段并显示参数');
+                        } else {
+                            console.warn('⚠️ 未找到第一个阶段容器');
+                        }
+                    }, 100);
+                }
+
+                console.log('✅ 流程图渲染完成');
+                console.log('🎨 === 流程图渲染结束 ===\n');
+
+            } catch (error) {
+                console.error('❌ 渲染流程图时出错:', error);
+                flowDiagram.innerHTML = `<div class="alert alert-danger">渲染流程图时出错: ${error.message}</div>`;
+            }
+        }
+
+        // 过滤详细数据
+        function filterDetailsData(searchTerm) {
+            const dataset = globalData.currentDataset;
+            const datasetData = globalData.datasets[dataset];
+
+            if (!datasetData) return;
+
+            // 准备数据
+            const detailsData = [];
+
+            if (datasetData.perInstanceStats && datasetData.scenarioState) {
+                const perInstanceStats = datasetData.perInstanceStats;
+                const scenarioState = datasetData.scenarioState;
+
+                scenarioState.request_states.forEach(requestState => {
+                    const instanceId = requestState.instance.id;
+                    const instanceStats = perInstanceStats.find(stat => stat.instance_id === instanceId);
+
+                    if (instanceStats) {
+                        const question = requestState.instance.input.text;
+                        const modelInput = JSON.stringify(requestState.request.messages, null, 2);
+                        const modelOutput = requestState.result.completions[0].text;
+
+                        // 找到正确答案（支持多选题）
+                        let correctAnswers = [];
+                        requestState.instance.references.forEach(ref => {
+                            if (ref.tags && ref.tags.includes('correct')) {
+                                correctAnswers.push(ref.output.text);
+                            }
+                        });
+                        const correctAnswer = correctAnswers.length > 1
+                            ? correctAnswers.join('、')
+                            : (correctAnswers.length === 1 ? correctAnswers[0] : '');
+
+                        // 获取指标值
+                        const metrics = {};
+                        let meanScore = 0;
+                        const selectedMetric = document.getElementById('metric-select').value;
+
+                        instanceStats.stats.forEach(stat => {
+                            metrics[stat.name.name] = stat.mean;
+                            // 如果选择了特定指标，使用该指标；否则使用第一个指标
+                            if (selectedMetric && stat.name.name === selectedMetric) {
+                                meanScore = stat.mean;
+                            } else if (!selectedMetric) {
+                                meanScore = stat.mean; // 使用第一个指标
+                            }
+                        });
+
+                        // 如果没有找到选中的指标，使用第一个可用指标
+                        if (selectedMetric && meanScore === 0 && instanceStats.stats.length > 0) {
+                            meanScore = instanceStats.stats[0].mean;
+                        }
+
+                        // 搜索过滤
+                        if (searchTerm === '' ||
+                            instanceId.toLowerCase().includes(searchTerm) ||
+                            question.toLowerCase().includes(searchTerm) ||
+                            modelOutput.toLowerCase().includes(searchTerm) ||
+                            correctAnswer.toLowerCase().includes(searchTerm)) {
+
+                            detailsData.push({
+                                id: instanceId,
+                                question,
+                                correctAnswer,
+                                modelInput,
+                                modelOutput,
+                                meanScore
+                            });
+                        }
+                    }
+                });
+            }
+
+            // 保存过滤后的数据
+            globalData.filteredData = detailsData;
+            globalData.currentPage = 1;
+
+            // 渲染分页
+            renderPagination();
+
+            // 渲染表格
+            renderDetailsTablePage();
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 分页条数选择变更
+            document.getElementById('items-per-page').addEventListener('change', function () {
+                globalData.itemsPerPage = parseInt(this.value);
+                globalData.currentPage = 1;
+                renderPagination();
+                renderDetailsTablePage();
+            });
+
+            // 跳转到指定页功能
+            document.getElementById('goto-button').addEventListener('click', function () {
+                const gotoPage = parseInt(document.getElementById('goto-page').value);
+                const totalPages = Math.ceil(globalData.filteredData.length / globalData.itemsPerPage);
+
+                if (gotoPage && gotoPage >= 1 && gotoPage <= totalPages) {
+                    globalData.currentPage = gotoPage;
+                    renderDetailsTablePage();
+                    renderPagination();
+                    document.getElementById('goto-page').value = '';
+                }
+            });
+
+            // 跳转输入框回车事件
+            document.getElementById('goto-page').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('goto-button').click();
+                }
+            });
+
+
+            // 指标选择器变更
+            document.getElementById('metric-select').addEventListener('change', function () {
+                renderDetailsTable();
+            });
+
+            // 搜索功能
+            document.getElementById('search-button').addEventListener('click', function () {
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                filterDetailsData(searchTerm);
+            });
+
+            document.getElementById('search-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    const searchTerm = this.value.toLowerCase();
+                    filterDetailsData(searchTerm);
+                }
+            });
+
+            // 数据集搜索功能
+            document.getElementById('dataset-filter-button').addEventListener('click', function () {
+                const filterText = document.getElementById('dataset-filter-input').value;
+                renderMetricsTable(filterText);
+            });
+
+            document.getElementById('dataset-filter-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    const filterText = this.value;
+                    renderMetricsTable(filterText);
+                }
+            });
+
+            // 实时搜索
+            document.getElementById('dataset-filter-input').addEventListener('input', function () {
+                const filterText = this.value;
+                renderMetricsTable(filterText);
+            });
+
+            // 图表类型切换
+            document.getElementById('bar-chart-btn').addEventListener('click', function () {
+                document.getElementById('line-chart-btn').classList.remove('active');
+                this.classList.add('active');
+                globalData.chartType = 'bar';
+                renderMetricsChart();
+            });
+
+            document.getElementById('line-chart-btn').addEventListener('click', function () {
+                document.getElementById('bar-chart-btn').classList.remove('active');
+                this.classList.add('active');
+                globalData.chartType = 'line';
+                renderMetricsChart();
+            });
+
+            // 评测流程 tab 切换事件
+            document.getElementById('flow-tab').addEventListener('shown.bs.tab', function () {
+                console.log('🔄 切换到评测流程 tab');
+
+                // 检查是否已经渲染了流程图分组内容
+                const flowGroupContent = document.getElementById('flowGroupTabContent');
+                if (flowGroupContent && flowGroupContent.children.length === 0) {
+                    const groupNames = Object.keys(globalData.flowGroups).sort();
+                    if (groupNames.length > 0) {
+                        const firstGroupName = groupNames[0];
+                        const firstPanelId = 'flowGroupPanel1';
+                        renderFlowGroupContent(firstGroupName, firstPanelId);
+                    }
+                } else if (flowGroupContent) {
+                    const activePanel = flowGroupContent.querySelector('.tab-pane.show.active');
+                    if (activePanel) {
+                        const flowDiagram = activePanel.querySelector('.flow-diagram');
+                        if (flowDiagram) {
+                            // 获取数据集选择器的值
+                            const searchInput = activePanel.querySelector(`input[id^='flow-dataset-search-']`);
+                            if (searchInput) {
+                                const dataset = searchInput.value;
+                                if (dataset) {
+                                    // 获取 panelId
+                                    const panelId = activePanel.id;
+                                    renderFlowDiagram(panelId);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 动态计算并设置tab内容高度
+        function calculateAndSetTabHeights() {
+            // 计算实际占用的高度
+            const body = document.body;
+            const container = document.querySelector('.container-fluid');
+            const header = document.querySelector('.header-container');
+            const navTabs = document.querySelector('.nav-tabs');
+
+            if (!container || !header || !navTabs) return;
+
+            // 获取各部分的实际高度
+            const bodyPadding = parseInt(getComputedStyle(body).paddingTop) + parseInt(getComputedStyle(body).paddingBottom);
+            const containerPaddingTop = parseInt(getComputedStyle(container).paddingTop);
+            const headerHeight = header.offsetHeight;
+            const navTabsHeight = navTabs.offsetHeight;
+            const tabContentPadding = 30; // tab-content的上下padding
+
+            // 计算总的占用高度
+            const totalUsedHeight = bodyPadding + containerPaddingTop + headerHeight + navTabsHeight + tabContentPadding + 20; // 额外20px缓冲
+
+            // 计算可用高度
+            const availableHeight = window.innerHeight - totalUsedHeight;
+
+            console.log(`📏 高度计算:
+                窗口高度: ${window.innerHeight}px
+                body padding: ${bodyPadding}px
+                container padding-top: ${containerPaddingTop}px
+                header高度: ${headerHeight}px
+                nav-tabs高度: ${navTabsHeight}px
+                tab-content padding: ${tabContentPadding}px
+                总占用: ${totalUsedHeight}px
+                可用高度: ${availableHeight}px`);
+
+            // 动态设置CSS变量
+            document.documentElement.style.setProperty('--available-height', `${availableHeight}px`);
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化语言
+            switchLanguage('en');
+
+            init();
+            setupEventListeners();
+
+            // 初始计算高度
+            setTimeout(calculateAndSetTabHeights, 100);
+
+            // 监听窗口大小变化
+            window.addEventListener('resize', calculateAndSetTabHeights);
+        });
+    </script>
+</body>
+
+</html>

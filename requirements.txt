@@ -1,0 +1,27 @@
+# LLM评测框架依赖包
+# Python版本要求: 3.11+
+
+# 核心依赖包
+# 数据验证和序列化
+pydantic>=2.0.0,<3.0.0
+
+# 系统监控和进程管理
+psutil>=5.9.0
+
+# HTTP请求库
+requests>=2.28.0
+
+# 数据类转换
+dacite>=1.8.0
+
+# 文件锁定
+portalocker>=2.7.0
+
+# 并发日志处理
+concurrent-log-handler>=0.9.24
+
+# 大语言模型接口库
+litellm>=1.0.0
+
+# 测试用例
+pytest>=7.4.0

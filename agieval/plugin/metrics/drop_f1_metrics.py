@@ -14,11 +14,6 @@ import string
 from scipy.optimize import linear_sum_assignment
 import numpy as np
 
-try:
-    import jieba
-except:
-    pass
-
 ANSWER_PATTERN = r"(?i)Answer\s*:\s*([^\n]+)"
 
 

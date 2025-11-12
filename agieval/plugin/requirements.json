@@ -1,5 +1,11 @@
 {
     "agieval.plugin.metrics.drop_f1_metrics": [
         "scipy"
+    ],
+    "agieval.plugin.metrics.mifeval_metrics": [
+        "absl-py",
+        "immutabledict",
+        "nltk",
+        "langdetect"
     ]
 }

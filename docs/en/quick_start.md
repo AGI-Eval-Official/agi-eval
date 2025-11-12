@@ -21,7 +21,7 @@ We strongly recommend using `conda` to manage your Python environment.
 #### Source Installation
 - Download source code
 ```bash
-git clone git@github.com:AGI-Eval-Official/agi-eval.git
+git clone https://github.com/AGI-Eval-Official/agi-eval.git
 ```
 - Install dependencies
 ```bash

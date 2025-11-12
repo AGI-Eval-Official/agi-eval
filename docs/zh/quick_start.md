@@ -21,7 +21,7 @@
 #### 源码安装
 - 下载源码
 ```bash
-git clone git@github.com:AGI-Eval-Official/agi-eval.git
+git clone https://github.com/AGI-Eval-Official/agi-eval.git
 ```
 - 依赖安装
 ```bash

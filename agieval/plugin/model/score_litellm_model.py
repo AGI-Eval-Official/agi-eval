@@ -42,6 +42,7 @@ class ScoreLiteLLMModel(BaseModel[ScoreLiteLLMModelPluginParam]):
             model=self.context_param.score_model,
             api_base=self.context_param.score_base_url,
             api_key=self.context_param.score_api_key,
+            custom_llm_provider=self.context_param.score_custom_llm_provider,
             messages=request.messages_as_dict(),
             max_tokens=request.max_new_tokens,
             temperature=request.temperature,

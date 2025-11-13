@@ -24,8 +24,8 @@ def get_datasets_from_git():
     try:
         content = download_file(f"{DATASET_GITURL}/{DATASETS_FILE}")
         return [dataset.strip() for dataset in content.split("\n")]
-    except subprocess.CalledProcessError as e:
-        log_error(f"get_datasets_from_git error: {e.stderr}")
+    except Exception as e:
+        log_error(f"get the adapted datasets error: {str(e)}")
         return []
 
 def download_dataset_config(dataset, dataset_config_path):
@@ -38,8 +38,8 @@ def download_dataset_config(dataset, dataset_config_path):
         return
     try:
         download_file(f"{DATASET_GITURL}/{dataset}/{DATASET_CONFIG_FILE}", dataset_config_path)
-    except subprocess.CalledProcessError as e:
-        msg = f"download_dataset_config error: {e.stderr}"
+    except Exception as e:
+        msg = f"download dataset {dataset} config error: {str(e)}"
         log_error(msg)
         print(msg)
         return []
@@ -73,18 +73,15 @@ def download_dataset_from_git(dataset, dataset_dir):
 
 
 def download_file(url, save_path = ""): 
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        content = response.content.decode('utf-8')
+    response = requests.get(url)
+    response.raise_for_status()
+    content = response.content.decode('utf-8')
 
-        if save_path:
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            with open(save_path, 'w') as f:
-                f.write(content)
-        return content
-    except Exception as e:
-        raise subprocess.CalledProcessError(1, f"download_file failed: {str(e)}")
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        with open(save_path, 'w') as f:
+            f.write(content)
+    return content
         
 def download_dataset_files(dataset, output_dir):
     output_file = f"{dataset}.tar.gz"

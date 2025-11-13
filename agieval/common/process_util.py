@@ -49,9 +49,7 @@ class SubProcessContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
             return
-        traceback_message = traceback.format_exc()
-        log_error(traceback_message)
-        save_sub_process_exception(self.parent_pid, self.pid, str(exc_val), traceback_message)
+        save_sub_process_exception(self.parent_pid, self.pid, str(exc_val), traceback.format_exc())
         
 
 

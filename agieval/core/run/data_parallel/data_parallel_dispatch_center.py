@@ -10,7 +10,7 @@ class DataParallelDispatchCenter(DispatchCenter):
 
     def __init__(self, eval_config: EvalConfig, benchmark_configs: list[BenchmarkConfig]):
         super().__init__(eval_config=eval_config, benchmark_configs=benchmark_configs)
-        self.benchmark_retry_times = 3
+        self.benchmark_retry_times = 2
         self.shared_param_ready = False
 
 
@@ -40,9 +40,10 @@ class DataParallelDispatchCenter(DispatchCenter):
 
     def retry_benchmark(self, benchmark: BenchmarkConfig):
         with self.assignment_lock:
-            log(f"self.benchmark_allocation={self.benchmark_allocation}")
             if len(self.benchmark_allocation[benchmark.benchmark]) < self.benchmark_retry_times:
                 self.benchmark_queue.put(benchmark)
+                return True
+            return False
         
 
     def get_shared_param(self, manager: SyncManager) -> dict:

@@ -43,7 +43,6 @@ class ModelScoreZeroshotV2Agent(BaseAgent[ModelScoreZeroshotV2AgentParam]):
                 ],
                 max_new_tokens=self.context_param.score_max_new_tokens,
                 temperature=0.0,  # Scoring uses fixed parameters
-                n_samples=1
             )
 
             # Call scoring model

@@ -1,9 +1,3 @@
-import copy
-import json
-import time
-import uuid
-from typing import List
-import asyncio
 from typing import Optional
 from pydantic import Field
 from agieval.core.plugin.plugins_decorator import InferAgentPlugin
@@ -46,7 +40,6 @@ class ModelScoreSimpleQaAgent(BaseAgent[ModelScoreSimpleQaAgentParam]):
                 ],
                 max_new_tokens=self.context_param.score_max_new_tokens,
                 temperature=0.0,  # Scoring uses fixed parameters
-                n_samples=1
             )
 
             # Call scoring model

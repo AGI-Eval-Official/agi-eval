@@ -1,6 +1,4 @@
-import traceback
-
-from agieval.common.logger import log, log_error
+from agieval.common.logger import log
 from agieval.core.run.data_parallel.data_parallel_dispatch_center import DataParallelDispatchCenter
 from agieval.core.run.runner import Runner
 
@@ -17,9 +15,8 @@ class DataParallelRunner(Runner[DataParallelDispatchCenter]):
                     self.dispatch_center.execute_stage(self, benchmark, flow_stage, self.dispatch_center.eval_config)
                 self.dispatch_center.finish_benchmark(benchmark)
             except Exception as e:
-                log_error(f"Dataset {benchmark.benchmark} execution exception, {e}")
-                log(traceback.format_exc())
-                self.dispatch_center.retry_benchmark(benchmark)
+                if not self.dispatch_center.retry_benchmark(benchmark):
+                    raise Exception(f"Dataset {benchmark.benchmark} execution exception, {str(e)}") from e
 
             benchmark = self.dispatch_center.get_benchmark()
 

@@ -4,8 +4,6 @@ from pydantic import Field
 from agieval.core.plugin.plugins_decorator import InferAgentPlugin
 from agieval.entity.request_state import RequestState
 from agieval.entity.plugin_param.step_param import BaseAgentPluginParam
-from agieval.entity.request_result import RequestResult
-from agieval.entity.sequence import Sequence
 from agieval.plugin.agent.base_agent import BaseAgent
 from agieval.plugin.model.base_model import BaseModel
 
@@ -59,7 +57,6 @@ class ModelScoreZeroshotV3Agent(BaseAgent[ModelScoreZeroshotV3AgentParam]):
                 ],
                 max_new_tokens=self.context_param.score_max_new_tokens,
                 temperature=0.0,  # Scoring uses fixed parameters
-                n_samples=1
             )
 
             # Call scoring model

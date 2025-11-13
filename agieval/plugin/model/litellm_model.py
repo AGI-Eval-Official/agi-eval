@@ -31,6 +31,7 @@ class LiteLLMModel(BaseModel[BaseModelPluginParam]):
             model=self.context_param.model,
             api_base=self.context_param.base_url,
             api_key=self.context_param.api_key,
+            custom_llm_provider=self.context_param.custom_llm_provider,
             messages=request.messages_as_dict(),
             max_tokens=request.max_new_tokens,
             temperature=request.temperature,

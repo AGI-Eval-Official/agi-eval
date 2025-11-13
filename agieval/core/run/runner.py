@@ -34,8 +34,8 @@ class Runner(ABC, Generic[T]):
         try:
             self.do_run()
         except Exception as e:
-            log_error(f"Runner {self.__class__.__name__} run excetion, {e}")
-            log(traceback.format_exc())
+            log_error(f"Runner {self.__class__.__name__} run excetion, {e}, {traceback.format_exc()}")
+            raise e
         log(f"Runner {self.__class__.__name__} run finished")
         
     @abstractmethod

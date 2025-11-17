@@ -21,14 +21,33 @@ eval_config: EvalConfig = EvalConfig(
 benchmark_config_template = BenchmarkConfig(
     benchmark="",
     location_test="",
-    use_cache=False,
+    use_cache=True,
     flow_config_file="",
     flow_stages=[
         FlowStage(
             plugin_implement="SimpleDataProcessor",
             plugins=[
                 PluginConfig(
-                    plugin_implement="MultipleChoiceScenario"
+                    plugin_implement="GenerationScenario"
+                )
+            ]
+        ),
+        FlowStage(
+            plugin_implement="SimpleInferProcessor",
+            plugins=[
+                PluginConfig(
+                    plugin_implement="LiteLLMModel"
+                ),
+                PluginConfig(
+                    plugin_implement="SingleRoundTextAgent"
+                )
+            ]
+        ),
+        FlowStage(
+            plugin_implement="SimpleMetricsProcessor",
+            plugins=[
+                PluginConfig(
+                    plugin_implement="BBEHMetrics",
                 )
             ]
         )

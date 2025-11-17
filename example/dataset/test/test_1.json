@@ -2,14 +2,8 @@
     "examples":
     [
         {
-            "input": "以下是关于中国教师资格的单项选择题，请直接给出正确答案的选项。\n\n题目：我国先秦时期，主张“有教无类”，倡导“因材施教”的教育家是\nA. 庄子\nB. 孔子\nC. 孟子\nD. 荀子\n",
-            "target_scores":
-            {
-                "A": 0,
-                "C": 0,
-                "D": 0,
-                "B": 1
-            }
+            "input": "Question: Lauren and Jane work for the same company. They each need to use a computer for work sometimes. Unfortunately, the computer isn't very powerful. If two people are logged on at the same time, it usually crashes. So the company decided to institute an official policy. It declared that Lauren would be the only one permitted to use the computer in the mornings and that Jane would be the only one permitted to use the computer in the afternoons. As expected, Lauren logged on the computer the next day at 9:00 am. But Jane decided to disobey the official policy. She also logged on at 9:00 am. The computer crashed immediately. Did Jane cause the computer to crash?  Reply Yes or No based on the answer the majority of people would give. If you think people would be split roughly 50-50 between Yes and No then reply Ambiguous.\nThink step by step, and when you provide the final answer, please use the prefix \"The answer is:\" without any modification, and provide the answer directly, with no formatting, no bolding, and no markup. For instance: \"The answer is: 42\" or \"The answer is: yes\". If the question is multiple choice with a single correct answer, the final answer must only be the letter corresponding to the correct answer. For example, \"The answer is: (a)\".",
+            "target": "Yes"
         }
     ]
 }

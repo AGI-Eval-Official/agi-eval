@@ -10,12 +10,12 @@
                 "context_params": {
                     "benchmark_id": "test_example_1",
                     "work_dir": "result/test",
-                    "use_cache": "False",
+                    "use_cache": "True",
                     "benchmark_path": "example/dataset/test/test_1.json"
                 },
                 "plugins": [
                     {
-                        "plugin_implement": "MultipleChoiceScenario",
+                        "plugin_implement": "GenerationScenario",
                         "plugin_type": "scenario",
                         "context_params": {
                             "benchmark_id": "test_example_1",
@@ -30,13 +30,10 @@
                             "benchmark_id": "test_example_1",
                             "work_dir": "result/test",
                             "max_new_tokens": 4096,
-                            "temperature": 0.7,
+                            "temperature": 0.6,
                             "top_p": 0.95,
-                            "top_k": 0,
-                            "presence_penalty": 0,
-                            "frequency_penalty": 0.0,
+                            "top_k": -1,
                             "stop_sequences": [],
-                            "adapter_stop_sequence": [],
                             "benchmark_path": "example/dataset/test/test_1.json"
                         }
                     },
@@ -50,11 +47,77 @@
                         }
                     }
                 ],
-                "use_cache": false
+                "use_cache": true
+            },
+            {
+                "stage": "SimpleInferProcessor",
+                "plugin_type": "stage_infer_processor",
+                "plugin_implement": "SimpleInferProcessor",
+                "context_params": {
+                    "benchmark_id": "test_example_1",
+                    "work_dir": "result/test",
+                    "use_cache": "True",
+                    "concurrency": 10,
+                    "cache_update_interval": 10,
+                    "cache_update_time_interval": 30,
+                    "benchmark_path": "example/dataset/test/test_1.json"
+                },
+                "plugins": [
+                    {
+                        "plugin_implement": "LiteLLMModel",
+                        "plugin_type": "load_model",
+                        "context_params": {
+                            "benchmark_id": "test_example_1",
+                            "work_dir": "result/test",
+                            "model": "",
+                            "base_url": "",
+                            "api_key": "",
+                            "retry_time": 10,
+                            "retry_time_interval": 10,
+                            "custom_llm_provider": "openai",
+                            "benchmark_path": "example/dataset/test/test_1.json"
+                        }
+                    },
+                    {
+                        "plugin_implement": "SingleRoundTextAgent",
+                        "plugin_type": "agent",
+                        "context_params": {
+                            "benchmark_id": "test_example_1",
+                            "work_dir": "result/test",
+                            "disable_cache": false,
+                            "benchmark_path": "example/dataset/test/test_1.json"
+                        }
+                    }
+                ],
+                "use_cache": true
+            },
+            {
+                "stage": "SimpleMetricsProcessor",
+                "plugin_type": "stage_metrics_processor",
+                "plugin_implement": "SimpleMetricsProcessor",
+                "context_params": {
+                    "benchmark_id": "test_example_1",
+                    "work_dir": "result/test",
+                    "use_cache": "True",
+                    "benchmark_path": "example/dataset/test/test_1.json"
+                },
+                "plugins": [
+                    {
+                        "plugin_implement": "BBEHMetrics",
+                        "plugin_type": "metrics",
+                        "context_params": {
+                            "benchmark_id": "test_example_1",
+                            "work_dir": "result/test",
+                            "metrics_name": "bbeh_metrics",
+                            "benchmark_path": "example/dataset/test/test_1.json"
+                        }
+                    }
+                ],
+                "use_cache": true
             }
         ],
         "flow_config_file": "",
-        "use_cache": false
+        "use_cache": true
     },
     {
         "benchmark": "test_example_2",
@@ -67,12 +130,12 @@
                 "context_params": {
                     "benchmark_id": "test_example_2",
                     "work_dir": "result/test",
-                    "use_cache": "False",
+                    "use_cache": "True",
                     "benchmark_path": "example/dataset/test/test_2.json"
                 },
                 "plugins": [
                     {
-                        "plugin_implement": "MultipleChoiceScenario",
+                        "plugin_implement": "GenerationScenario",
                         "plugin_type": "scenario",
                         "context_params": {
                             "benchmark_id": "test_example_2",
@@ -87,13 +150,10 @@
                             "benchmark_id": "test_example_2",
                             "work_dir": "result/test",
                             "max_new_tokens": 4096,
-                            "temperature": 0.7,
+                            "temperature": 0.6,
                             "top_p": 0.95,
-                            "top_k": 0,
-                            "presence_penalty": 0,
-                            "frequency_penalty": 0.0,
+                            "top_k": -1,
                             "stop_sequences": [],
-                            "adapter_stop_sequence": [],
                             "benchmark_path": "example/dataset/test/test_2.json"
                         }
                     },
@@ -107,10 +167,76 @@
                         }
                     }
                 ],
-                "use_cache": false
+                "use_cache": true
+            },
+            {
+                "stage": "SimpleInferProcessor",
+                "plugin_type": "stage_infer_processor",
+                "plugin_implement": "SimpleInferProcessor",
+                "context_params": {
+                    "benchmark_id": "test_example_2",
+                    "work_dir": "result/test",
+                    "use_cache": "True",
+                    "concurrency": 10,
+                    "cache_update_interval": 10,
+                    "cache_update_time_interval": 30,
+                    "benchmark_path": "example/dataset/test/test_2.json"
+                },
+                "plugins": [
+                    {
+                        "plugin_implement": "LiteLLMModel",
+                        "plugin_type": "load_model",
+                        "context_params": {
+                            "benchmark_id": "test_example_2",
+                            "work_dir": "result/test",
+                            "model": "",
+                            "base_url": "",
+                            "api_key": "",
+                            "retry_time": 10,
+                            "retry_time_interval": 10,
+                            "custom_llm_provider": "openai",
+                            "benchmark_path": "example/dataset/test/test_2.json"
+                        }
+                    },
+                    {
+                        "plugin_implement": "SingleRoundTextAgent",
+                        "plugin_type": "agent",
+                        "context_params": {
+                            "benchmark_id": "test_example_2",
+                            "work_dir": "result/test",
+                            "disable_cache": false,
+                            "benchmark_path": "example/dataset/test/test_2.json"
+                        }
+                    }
+                ],
+                "use_cache": true
+            },
+            {
+                "stage": "SimpleMetricsProcessor",
+                "plugin_type": "stage_metrics_processor",
+                "plugin_implement": "SimpleMetricsProcessor",
+                "context_params": {
+                    "benchmark_id": "test_example_2",
+                    "work_dir": "result/test",
+                    "use_cache": "True",
+                    "benchmark_path": "example/dataset/test/test_2.json"
+                },
+                "plugins": [
+                    {
+                        "plugin_implement": "BBEHMetrics",
+                        "plugin_type": "metrics",
+                        "context_params": {
+                            "benchmark_id": "test_example_2",
+                            "work_dir": "result/test",
+                            "metrics_name": "bbeh_metrics",
+                            "benchmark_path": "example/dataset/test/test_2.json"
+                        }
+                    }
+                ],
+                "use_cache": true
             }
         ],
         "flow_config_file": "",
-        "use_cache": false
+        "use_cache": true
     }
 ]

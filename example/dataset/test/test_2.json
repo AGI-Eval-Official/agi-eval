@@ -2,14 +2,8 @@
     "examples":
     [
         {
-            "input": "以下是关于临床知识的单项选择题，请直接给出正确答案的选项。\n\n题目：对评估肝硬化患者预后意义不大的是\nA. 腹水\nB. 凝血酶原时间\nC. 清蛋白\nD. 血电解质\n",
-            "target_scores":
-            {
-                "A": 0,
-                "C": 0,
-                "D": 1,
-                "B": 0
-            }
+            "input": "You are an expert in a language called dyck where you must complete the language sequence of unclosed brackets of all types (e.g., [], {}, <>). You are given an initial initial dyck language sequence and the steps, provided as\nthoughts, that were used to arrive at the closing bracket sequence in the dyck language. Your job is to identify the first step that was a mistake in reasoning about the closing bracket sequence in dyck language, if any.\nThis can be forgetting to close a bracket or closing with the wrong bracket or incorrectly copying the prior subsequence of closing brackets to the next step.\nTask: Complete the rest of the sequence, making sure that the parentheses are closed properly. Input: < { [ ] [ [ ] { } [ [ ( ( [ ] ) ) ] ( [ ] ) ] { ( ( < { } { } > ) ) } ] [ ] < [ ( ) ] > }\nThought 1: We should process each input one by one and keep track of the stack configuration.\nThought 2: stack: empty\nThought 3: < ; stack: <\nThought 4: { ; stack: < {\nThought 5: [ ; stack: < { [\nThought 6: ] ; stack: < {\nThought 7: [ ; stack: < { [\nThought 8: ] ; stack: < {\nThought 9: [ ; stack: < { [\nThought 10: ] ; stack: < {\nThought 11: { ; stack: < { {\nThought 12: } ; stack: < {\nThought 13: [ ; stack: < { [\nThought 14: [ ; stack: < { [ [\nThought 15: ( ; stack: < { [ [ (\nThought 16: ( ; stack: < { [ [ ( (\nThought 17: [ ; stack: < { [ [ ( ( [\nThought 18: ] ; stack: < { [ [ ( (\nThought 19: ) ; stack: < { [ [ (\nThought 20: ) ; stack: < { [ [\nThought 21: ] ; stack: < { [\nThought 22: ( ; stack: < { [ (\nThought 23: [ ; stack: < { [ ( [\nThought 24: ] ; stack: < { [ (\nThought 25: ) ; stack: < { [\nThought 26: { ; stack: < { {\nThought 27: ( ; stack: < { { (\nThought 28: ( ; stack: < { { ( (\nThought 29: < ; stack: < { { ( ( <\nThought 30: { ; stack: < { { ( ( < {\nThought 31: } ; stack: < { { ( ( <\nThought 32: } ; stack: < { { ( (\nThought 33: ) ; stack: < { {\nThought 34: ) ; stack: < {\nThought 35: ] ; stack: <\nThought 36: [ ; stack: < [\nThought 37: < ; stack: < [ <\nThought 38: [ ; stack: < [ < [\nThought 39: ( ; stack: < [ < [ (\nThought 40: ) ; stack: < [ < [\nThought 41: ] ; stack: < [ <\nThought 42: > ; stack: < [\nThought 43: } ; stack: empty\nThought 44: Now, we have reached the end. The final stack is empty.\nThought 45: So the answer is >\nQ: Is there a mistake in this sequence? Write \"No\" if there are no mistakes, or the number N if there is a mistake in Thought N.\nThink step by step, and when you provide the final answer, please use the prefix \"The answer is:\" without any modification, and provide the answer directly, with no formatting, no bolding, and no markup. For instance: \"The answer is: 42\" or \"The answer is: yes\". If the question is multiple choice with a single correct answer, the final answer must only be the letter corresponding to the correct answer. For example, \"The answer is: (a)\".",
+            "target": "8"
         }
     ]
 }

@@ -10,6 +10,7 @@ pytestdebug.log
 *.egg-info/
 .DS_Store
 **/.DS_Store
+build
 
 result*
 logs

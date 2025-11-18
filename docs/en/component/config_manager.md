@@ -1,7 +1,7 @@
 # Configuration Management
 
 ## Overview
-The configuration management system of the AGI-Eval framework is responsible for parsing and validating configuration files, handling the merging and overriding of multi-layer configurations. The configuration management module supports flexible parameter passing and dynamic configuration rendering, providing powerful configuration capabilities for the framework. This section will detail the usage of configuration files.
+The configuration management system of the `agi-eval` framework is responsible for parsing and validating configuration files, handling the merging and overriding of multi-layer configurations. The configuration management module supports flexible parameter passing and dynamic configuration rendering, providing powerful configuration capabilities for the framework. This section will detail the usage of configuration files.
 
 Configuration files are generally divided into two parts:
 

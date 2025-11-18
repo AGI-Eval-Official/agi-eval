@@ -4,7 +4,7 @@
 This section introduces how to use the framework capabilities through the command line tool.
 
 ## Tool Introduction
-The AGI-Eval command line tool (CLI) only supports installation through `pip install -e .` for local debugging, and does not provide online installation methods.
+The `agi-eval` command line tool (CLI) only supports installation through `pip install -e .` for local debugging, and does not provide online installation methods.
 
 For details, refer to [Environment Setup](./installation.md).
 

@@ -1,6 +1,6 @@
 # 🛠️ Environment Setup
 
-The following provides the setup process for the **AGI-Eval** dependency environment, requirements for custom datasets, and requirements for evaluation models.
+The following provides the setup process for the `agi-eval` dependency environment, requirements for custom datasets, and requirements for evaluation models.
 
 We strongly recommend using `conda` to manage your Python environment.
 

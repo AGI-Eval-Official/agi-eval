@@ -2,7 +2,7 @@
 
 ## Introduction
 
-AGI-Eval is a plugin-based architecture evaluation framework for Large Language Models (LLMs), aiming to provide a flexible and scalable evaluation platform. The framework supports multiple evaluation scenarios, model integration methods, and evaluation metrics, adopting a modular design to facilitate developers in customizing and extending functionality according to their needs.
+`agi-eval` is a plugin-based architecture evaluation framework for Large Language Models (LLMs), aiming to provide a flexible and scalable evaluation platform. The framework supports multiple evaluation scenarios, model integration methods, and evaluation metrics, adopting a modular design to facilitate developers in customizing and extending functionality according to their needs.
 
 ## Core Features
 

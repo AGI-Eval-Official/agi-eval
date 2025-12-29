@@ -130,7 +130,7 @@ def run_example_dataset(dataset, eval_config: EvalConfig, benchmark_config_templ
             benchmark_configs = load_benchmark_configs(eval_config, eval_config.benchmark_config, "")
         else:
             eval_config.dataset_files = os.path.join(os.getcwd(), eval_config.dataset_files)
-            if not download_dataset_from_git(dataset, eval_config.dataset_files):
+            if not download_dataset_by_remote(dataset, eval_config.dataset_files):
                 log_error("Dataset download failed, terminating subsequent evaluation process")
                 raise Exception("Dataset download failed")
             benchmark_configs = load_benchmark_configs(eval_config, benchmark_config_template, "")

@@ -2,6 +2,7 @@ import os
 from typing import List, Optional
 from argparse import ArgumentParser
 import importlib.util
+from dotenv import load_dotenv
 
 from agieval.common.logger import setup_logger, log, log_error
 from agieval.core.run.runner_type import RunnerType
@@ -10,8 +11,10 @@ from agieval.entity.eval_config import EvalConfig
 from agieval.entity.flow_config import BenchmarkConfig
 from agieval.entity.global_param import GlobalParam
 from agieval.common.param_utils import load_benchmark_configs
-from agieval.common.dataset_util import download_dataset_from_git, download_dataset_config, DATASET_CONFIG_FILE
+from agieval.common.dataset_util import download_dataset_by_remote, download_dataset_config, DATASET_CONFIG_FILE
 from agieval.common.process_util import ProcessContext
+
+load_dotenv()
 
 def _parse_extra_param(extra_params: Optional[List[str]], group_name: str) -> dict:
     """Validate and parse key-value pair parameters"""
@@ -111,7 +114,7 @@ def run_example_dataset(dataset, eval_config: EvalConfig, benchmark_config_templ
             benchmark_configs = load_benchmark_configs(eval_config, eval_config.benchmark_config, "")
         else:
             eval_config.dataset_files = os.path.join(os.getcwd(), eval_config.dataset_files)
-            if not download_dataset_from_git(dataset, eval_config.dataset_files):
+            if not download_dataset_by_remote(dataset, eval_config.dataset_files):
                 log_error("Dataset download failed, terminating subsequent evaluation process")
                 raise Exception("Dataset download failed")
             benchmark_configs = load_benchmark_configs(eval_config, benchmark_config_template, "")

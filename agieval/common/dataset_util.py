@@ -8,11 +8,11 @@ DATASET_CONFIG_FILE = "config.py"
 DATASET_PATH = "example/dataset"
 DATASETS_FILE = "datasets.txt"
 DATASETS_FILE_PACKAGE = "files.tar.gz"
-DATASET_GITURL = "https://raw.githubusercontent.com/AGI-Eval-Official/agi-eval-benchmarks/master"
+DATASET_HOST = "https://s3plus-bj02.sankuai.com/arena/datasets/agi-eval-benchmarks"
 DATASET_TEMP_DIR = "/tmp/agieval_dataset/"
 
 def get_datasets():
-    datasets = get_datasets_from_git()
+    datasets = get_datasets_by_remote()
     for dir in os.listdir(DATASET_PATH):
         config_file = os.path.join(DATASET_PATH, dir, DATASET_CONFIG_FILE)
         if os.path.exists(config_file) and dir not in datasets:
@@ -20,9 +20,9 @@ def get_datasets():
     return datasets
 
 
-def get_datasets_from_git():
+def get_datasets_by_remote():
     try:
-        content = download_file(f"{DATASET_GITURL}/{DATASETS_FILE}")
+        content = download_file(f"{DATASET_HOST}/{DATASETS_FILE}")
         return [dataset.strip() for dataset in content.split("\n")]
     except Exception as e:
         log_error(f"get the adapted datasets error: {str(e)}")
@@ -37,7 +37,7 @@ def download_dataset_config(dataset, dataset_config_path):
         print(msg)
         return
     try:
-        download_file(f"{DATASET_GITURL}/{dataset}/{DATASET_CONFIG_FILE}", dataset_config_path)
+        download_file(f"{DATASET_HOST}/{dataset}/{DATASET_CONFIG_FILE}", dataset_config_path)
     except Exception as e:
         msg = f"download dataset {dataset} config error: {str(e)}"
         log_error(msg)
@@ -45,7 +45,7 @@ def download_dataset_config(dataset, dataset_config_path):
         return []
 
 
-def download_dataset_from_git(dataset, dataset_dir):
+def download_dataset_by_remote(dataset, dataset_dir):
     os.makedirs(dataset_dir, exist_ok=True)
     if os.path.exists(dataset_dir) and os.path.isdir(dataset_dir):
         # Check if directory is empty
@@ -88,7 +88,7 @@ def download_dataset_files(dataset, output_dir):
     os.makedirs(DATASET_TEMP_DIR, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
 
-    url = f"{DATASET_GITURL}/{dataset}/{DATASETS_FILE_PACKAGE}"
+    url = f"{DATASET_HOST}/{dataset}/{DATASETS_FILE_PACKAGE}"
     
     archive_path = os.path.join(DATASET_TEMP_DIR, output_file)
     
